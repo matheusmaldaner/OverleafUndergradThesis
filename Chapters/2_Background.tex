@@ -1,0 +1,168 @@
+\chapter{Background}
+\label{chap:background}
+
+This section provides the background and motivation behind selecting DiffLogic models as the central focus of this thesis. Section~\ref{sec:sec_criticalsectors} discusses the limitations of traditional deep learning models in domains that require explainability. Section~\ref{sec:sec_xai} presents the broader field of Explainable AI (XAI), exploring both its methods and current shortcomings. Section~\ref{sec:sec_xai} introduces Neurosymbolic AI (NSAI) as a promising alternative approach that combines neural networks with symbolic reasoning. Finally, Section~\ref{sec:sec_difflogic} explores Differentiable Logic Gate Networks (DiffLogic), a specific type of neurosymbolic AI which serves as the primary focus of this thesis.
+
+\section{Barriers for Deployment in Critical Sectors}
+\label{sec:sec_criticalsectors}
+
+Most modern AI systems that have gained popularity in recent years fall into the category of deep neural networks, large fully connected networks of continuous operations that often behave as ``black boxes'' as their internal decision-making processes are opaque even to their creators \cite{black_boxes}. This occurs because, after programmers establish initial parameters, the system learns autonomously from data, adjusting its internal settings in ways that are not easily interpretable. This limits the adoption of these powerful algorithms in critical sectors where human lives may be impacted. 
+
+In healthcare, this opacity undermines trust, as doctors may be hesitant to rely on a diagnostic that they cannot interpret or explain to patients, due to ethical ``do no harm'' obligations \cite{transparency_ai_in_healthcare}, pointing to lack of transparency as the main barrier to implementation \cite{Markus_2021}. In finance, lack of transparency poses regulatory and ethical challenges---while banks may use black-box models for credit decisions, they are unable to explain why a loan was denied, risking violations of laws like the Fair Credit Reporting Act \cite{maple2023airevolutionopportunitieschallenges}. In national security contexts, the opaqueness of black-box AI systems can undermine strategic decision-making. When defense or intelligence agencies rely on algorithms whose internal processes are inaccessible, commanders and policymakers are left unable to trace how outputs were generated, potentially compromising mission-critical judgments \cite{yu2022implications}. Similar to how opaque AIs in autonomous vehicles have raised concerns over accountability in public safety \cite{li2023knowledgedrivenautonomousdriving}, the unpredictable behavior of these models in military applications creates a trust gap—national security stakeholders fear ``inscrutable'' systems that may behave erratically, overlook emerging threats, or embed unrecognized biases \cite{HollandMichel2020TheBB, Hagos2024NeuroSymbolicAF}. This lack of transparency also makes it easier for ineffective predictive AI solutions, commonly referred to as ``AI snake oil'' \cite{snakeoil}, to be marketed deceptively to critical sectors.
+
+
+% Many predictive AI solutions are sold by companies as guaranteed fixes to complex problems while failing to deliver on their promises, leading to a phenomenon commonly referred to as ``AI snake oil. \cite{snakeoil}.'' 
+
+% Having model explanations in these cases would make it easier to identify such ineffective or misleading products \cite{snakeoil}
+
+\section{Explainable AI and Post-Hoc Limitations}
+\label{sec:sec_xai}
+
+To address transparency concerns in AI deployment, the field of Explainable AI (XAI) gained popularity, offering post-hoc explanation techniques to tackle black-box models. Popular methods include LIME, which provides local surrogate models to explain individual predictions \cite{ribeiro2016whyitrustyou}, and SHAP, which assigns importance scores to features \cite{lundberg2017unifiedapproachinterpretingmodel}. 
+
+While these tools help interpret complex models, researchers have found that post-hoc explanations are often inadequate or misleading. For one, these explanations are imprecise---creating simplified interpretive models that may not perfectly match the actual network’s workings. Recent studies demonstrated that adversarial tweaks can deceive LIME and SHAP, as a model can be engineered to use a certain feature for its decision while tricking LIME or SHAP into showing that feature as unimportant \cite{slack2020foolinglimeshapadversarial}. In other words, a clever (or accidental) configuration can ``generate deliberately misleading explanations'' that make a biased or erroneous model appear fair \cite{slack2020foolinglimeshapadversarial}. This questions the reliability of post-hoc explainers for auditing AI---if they can be gamed, they can't be fully trusted to detect bias or error.
+
+% This calls into question the reliability of such post-hoc explainers for auditing AI behavior---if an explanation method can be gamed, one cannot fully trust it to detect biases or errors.
+
+Another limitation is faithfulness, as post-hoc methods often highlight correlations rather than true causal reasons. Moreover, these explanations can be difficult for non-experts to grasp---saliency maps or abstract feature attributions might not satisfy a doctor or lawyer asking ``Why did the AI make that decision?'' \cite{yeh2019infidelitysensitivityexplanations}. 
+
+As a result, post-hoc XAI alone is not a panacea for the black-box problem and there is growing consensus that AI models should be more interpretable by design, or at least deeply integrated with explanation mechanisms, rather than treating explainability as an afterthought.
+
+% To further illustrate the variability inherent in saliency map–based XAI methods, this thesis introduces SaliencySlider - a software tool that enables interactive exploration and comparison of different saliency map generating algorithms. SaliencySlider allows users to intuitively visualize and compare how various regions in an image contribute to a model's prediction, thereby highlighting both the potential and limitations of post-hoc explanation methods. Details on SaliencySlider are provided in Section \ref{sec:saliencyslider}.
+
+\section{Neurosymbolic AI}
+\label{sec:sec_nsai}
+
+The evolution of artificial intelligence has been marked by three distinct waves, each with its own strengths, limitations, and philosophical underpinnings. The First Wave of AI, often called Symbolic AI, dominated the field from the 1950s through the 1980s and was characterized by explicit knowledge representation, formal logic, and rule-based systems \cite{newell1956logic, McCarthy1969-MCCSPP}. Systems such as expert systems, decision trees, and early natural language processing tools relied on hand-coded rules and logical inference mechanisms to perform reasoning. While these methods provided transparency and structured reasoning, they lacked adaptability, required extensive manual encoding of domain knowledge, struggled with scalability, and failed to handle uncertain or incomplete data.
+
+The Second Wave of AI, referred to as Subsymbolic or Connectionist AI, emerged in the late 1980s and early 1990s, driven by the advent of statistical learning, neural networks, and, later, deep learning \cite{lecun2015deep}. The resurgence of neural networks, particularly with the rise of deep learning in the 2010s, led to remarkable achievements in fields such as computer vision, natural language processing, and reinforcement learning \cite{cv_deep_learning_survey, nlp_deep_learning_survey, rl_deep_learning_survey}. However, this wave introduced new challenges; While deep learning systems excel at pattern recognition and generalization from large datasets, they operate as black-box models, offering little interpretability in their decision-making processes \cite{zhang2024neurosymbolicaiexplainabilitychallenges}. Furthermore, these models rely on massive amounts of data and computational power and lack structured reasoning capabilities, making them brittle when faced with out-of-distribution data or tasks requiring logical inference \cite{marcus2020nextdecadeai}. Incidents revolving around hallucinations, biases, and inexplicable errors have fueled prominent critiques of today’s deep learning AI models. Gary Marcus, a cognitive scientist and outspoken AI skeptic, argues that current deep learning systems lack true understanding and reasoning. 
+
+Marcus’s ``Deep Learning: A Critical Appraisal'' \cite{marcus2018deeplearningcriticalappraisal} highlighted that modern AI is ``data-hungry, lacking transparency, unable to extrapolate, and difficult to engineer'' toward reliable intelligence. In other words, while a model like GPT-4 might perform well on benchmarks, it may fail at robust inference beyond the data it saw in training, often making absurd mistakes when confronted with novel inputs or slightly shifted problems. On top of that, recent studies have shown that some benchmarks are not as reliable as expected \cite{reuel2024betterbenchassessingaibenchmarks}. 
+
+In response to these limitations, researchers have proposed a Third Wave of AI, which aims to integrate neural learning with symbolic reasoning, resulting in NSAI \cite{garcez2023neurosymbolic, nsai_trends}. Neurosymbolic AI represents an attempt to bridge the gap between the first two waves by combining the structured reasoning and transparency of symbolic methods with the adaptability and pattern recognition capabilities of neural networks \cite{colelough2025neurosymbolicai2024systematic}. Luís Lamb and Artur d’Avila Garcez argue in their work ``Neurosymbolic AI: The 3rd Wave'' that the next generation of AI must be both explainable and capable of robust reasoning, requiring a structured fusion of symbolic knowledge representation with neural-based learning systems \cite{garcez2023neurosymbolic}. 
+
+At its core, a neurosymbolic system can be envisioned as learning from data like a deep neural network while also manipulating symbols and rules like a classical logic engine. This integration allows such systems to explain their conclusions, adhere to physical and ethical constraints, and perform logical inferences beyond their training data. The need for such hybrid approaches has become increasingly evident in safety-critical domains, as researchers argue that the black-box nature of current deep learning may make it a dead end for achieving robust, trustworthy AI \cite{refId0, marcus2022deeparticle}.  
+
+
+\section{Differentiable Logic Gate Networks}
+\label{sec:sec_difflogic}
+
+Neurosymbolic AI has seen a surge of innovative systems that blend learning and reasoning, such as DeepMind’s AlphaGeometry \cite{53097, chervonyi2025goldmedalistperformancesolvingolympiad}, Neural Logic Networks \cite{shi2019neurallogicnetworks}, and probabilistic logic frameworks like DeepProbLog, among others \cite{manhaeve2018deepproblogneuralprobabilisticlogic}. These approaches illustrate the diverse strategies for integrating neural networks with symbolic knowledge, from neural-guided theorem proving to differentiable logic programming. Within this evolving landscape, researcher and computer scientist Henry Kautz has proposed a taxonomy of six neurosymbolic categories to characterize such systems \cite{Kautz_2022}.
+
+In Kautz’s classification, DiffLogic can be placed into the category of $\text{Neuro:Symbolic} 
+\rightarrow \text{Neuro}$ integration, which denotes approaches that embed or compile symbolic logic structures directly into a neural network’s design. DiffLogic aligns with this description since it incorporates discrete logical operations (Boolean logic gates) as the functional units of a neural model, using continuous relaxations during training. In other words, a trained DiffLogic model is a logic circuit, making it a clear instance of a neural model performing symbolic reasoning within its structure. While the original DiffLogic authors did not explicitly classify their work as a NSAI approach, many AI methods are neurosymbolic in spirit despite not being labeled as such \cite{sarker2021neurosymbolicartificialintelligencecurrent}. Given DiffLogic's combination of neural training with symbolic logic components, it can be considered under the NSAI umbrella.
+
+Logic-based NSAI approaches are particularly attractive for building explainable AI systems because their internals have discrete, symbol-like structures that humans can interpret. The use of formal logic elements (predicates, rules, gates, etc.) embeds these models with symbolic interpretability, meaning that the learned representations or decision rules can often be translated into human-comprehensible logical statements. Consequently, numerous logic-centered NSAI frameworks have been explored in recent years. For example, Logic Tensor Networks and DeepProbLog combine neural learning with logical constraints or probabilistic logic programs \cite{Badreddine_2022, manhaeve2018deepproblogneuralprobabilisticlogic}. Similarly, systems like Logical Neural Networks \cite{riegel2020logicalneuralnetworks}, Logical Boltzmann Machines \cite{tran2021logicalboltzmannmachines}, Neural Logic Machine \cite{dong2019neurallogicmachines}, and more leverage logic reasoning with neural architectures to maintain a logical structure. These examples underscore a broader trend that by injecting logic into AI models, one can often achieve more transparent behavior without entirely sacrificing the benefits of neural learning. DiffLogic fits into this logic-based explainable paradigm as it uses actual logic gate operations as building blocks, offering the prospect that the learned model can be read as a set of logical transformations rather than opaque matrix multiplications.
+
+In a DiffLogic network, differentiable logic gates are used instead of traditional nonlinear artificial neurons. Each unit in the network takes two binary inputs and produces a binary output via some Boolean function (AND, OR, XOR, etc.). Importantly, rather than fixing a gate’s operation a priori, DiffLogic learns which of the 16 possible two-input Boolean operators should govern each neuron. During training, a continuous relaxation is used: each neuron maintains a probability distribution over all 16 logic gate types and updates these probabilities via gradient descent. This soft selection mechanism is differentiable, enabling standard backpropagation to gradually favor certain logic functions for each unit. Once training converges, the network is discretized by picking the most likely gate at each neuron, yielding a pure logic gate network. 
+
+DiffLogic was chosen as the foundation for this thesis because of their simplicity, hardware-friendliness, and promise of transparency. Unlike many complex neurosymbolic models, DiffLogic uses a relatively straightforward concept---learning a network of Boolean logic gates---which keeps the architecture and its reasoning processes easy to conceptualize. This simplicity makes it easier to analyze and extend the model to digital hardware. By design, a DiffLogic model after training is essentially a Boolean circuit, which can be directly mapped onto FPGAs or other logic hardware for highly efficient execution, being a major advantage over conventional neural nets that require power-hungry arithmetic. Finally, because each unit corresponds to a specific logic operation, there is a clear path toward model transparency since one can, in principle, inspect the learned gates and connections to understand the decision logic, making DiffLogic an ideal candidate for further research into explainable and efficient AI.
+
+
+
+% illustrates this idea: raw inputs (e.g. image pixels) are binarized and fed through layers of learned logic gates, and the final layer’s outputs (multiple binary votes per class) are aggregated, for instance by simple bit-counting, to produce class scores. Because the learned model uses only Boolean computations and fixed connections, it can execute remarkably fast - the original authors report throughput exceeding one million MNIST images per second on a single CPU core. The logic gate network is also extremely sparse (each neuron has only two inputs and one output), contributing to its efficiency. Petersen et al. primarily evaluated DiffLogic on classification tasks (image recognition on MNIST and CIFAR-10, tabular data, etc.), finding that it achieves accuracy on par with conventional neural networks while dramatically improving inference speed and reducing model size
+
+Although recent research has addressed some of these points \cite{explogic}, the original DiffLogic study focused primarily on performance metrics---inference speed, model size, and classification accuracy---without specifically addressing issues related to explainability or specialized hardware implementation beyond CPU timing. For example, on datasets with known underlying logic (such as the MONK’s problems), DiffLogic matched the accuracy of neural baselines, but there lacked analysis on whether the learned gates corresponded to the expected logical rules. Similarly, while the architecture lends itself to hardware implementation, opportunities remain to investigate its deployment on specialized hardware, such as FPGAs.
+
+These gaps represent opportunities for extension: if DiffLogic truly yields human-understandable models and is built from digital-friendly components, one would expect to leverage those for both XAI insights and hardware acceleration. This thesis aims to fill those gaps by exploring the interpretability and hardware deployment of DiffLogic models.
+
+
+
+% -- how the original authors focused primarily on speed/inference times
+
+% -- mention similar approaches briefly and why difflogic was chosen over them
+
+% -- "yes i know what have been done in this field and this is the future directions"
+% ---- credibility of difflogic, visualization of difflogic, fpga deployment and mininets
+% ** How do you frame so they can see it **
+% 
+
+% sections 1-4 are disconnected, but important. 
+% compress the other 1-4 sections into 1-2 sections to work as the background
+
+% replicated work: DiffLogic training
+% novel work: fpga, mininet, visualization 
+
+% DiffLogic has not been used largely, at all, and many have not been used at many scenarios
+% -- These are the novel things we have done. I have also already released this as a separate publication and the visualization code has also been released.
+
+% designing the lock for the key
+
+%% Move this section up to the end 2.5, after talking about DiffLogic and pointing out what could be improved
+
+
+% \begin{itemize}
+%     \item \textit{Interpretability}: A smaller logic circuit is easier to interpret. If a DiffLogic network ends up with thousands of gates across several layers, it might be as just as opaque as a regular neural network with thousands of neurons. By reducing the gate count, we aim to obtain a more concise set of rules while achieving a similar performance in the test set. Ideally, a MiniNet might distill the logic into a form that could be written as a handful of logical clauses, though this is currently set as future work.
+
+%     \item \textit{Efficiency}: Fewer gates mean faster inference and lower resource usage, which is important for deploying on hardware like FPGAs or microcontrollers. It also reduces power consumption and potentially improves the model’s robustness, as fewer paths means fewer opportunities for noise to affect the outcome.
+
+%     \item \textit{Generalization}: Removing unnecessary gates can act as a form of regularization, potentially improving generalization. If a gate was merely memorizing a quirk of the training data, eliminating it might actually make the model perform better on new data. By focusing only on the critical gates, the MiniNet might capture the core logic of the task more cleanly.
+% \end{itemize}
+
+
+
+% -- how this paper seeks to further research proposed by felix petersen et. al
+
+
+% \chapter{INTRODUCTION and opening remarks} {\renewcommand*{\thefootnote}{\fnsymbol{footnote}}\footnotetext{An un-numbered footnote - this is how you tell the readers that this chapter was previously published and then cite the Journal where it was published. It is typically formatted like "Reprinted with permission from...}\label{intro}
+% \counterwithin{algorithm}{chapter}
+% \renewcommand*{\thealgorithm}{\thechapter-\arabic{algorithm}} %Lines 2 and 3 are specifically for those that are using multiple aglorithms in multiple chapters. These must be added to all chapters with algorithms to make the numbering of the objects work correctly. You are welcome to remove if this does not apply to you.
+
+% We automatically capitalize all chapters, but if you need to suppress this you can use the class option ``overrideTitles" and/or ``overrideChapter" to allow you to use non-capitalized letters in the title and/or chapter names respectively. For more detailed information on the template's features and options, see the included file ``ufdissertation-Doc-and-Troubleshooting".
+
+%  We don't recommend that you change much of anything in the class file unless you're absolutely sure of what your are doing.\renewcommand*{\thefootnote}{\arabic{footnote}}\setcounter{footnote}{0}\footnote{and now we're back to normal footnote marking} 
+
+% \section{First-Level Heading or Section Heading}
+
+% This is a first-level or Section heading. They should always be in Title-Case. Title case is where all principal words are capitalized except prepositions, articles, and conjunctions.  %\cite{green2008wrinkle}
+
+% \subsection{Second-Level or Subsection Heading}
+
+% This is a second-level or subsection heading. They will always be in title-case but are left-aligned. 
+
+% \subsubsection{Third-Level or Subsubsections}
+% The third level subheadings are left-aligned but in sentence case. Only the first letter and any proper nouns are capitalized. 
+
+% \subsubsection{If you divide a section, you must divide it into two, or more, parts}
+% What this means is that if you are going to break down text via subheading, you will want to make sure it is paired with at least one other subheading of the same "level." 
+
+% {\bf Paragraph headings.} There is no official fourth level heading. Do not use the Paragraph heading feature in LaTeX, simply apply the bold characteristic to the first few words of a paragraph followed by a colon or period.
+
+% \subsection{Subsection}
+
+% \(\Omega\) Aliquam mi nisi, tristique at rhoncus quis, consectetur non mi. Phasellus blandit quam ligula, a viverra lacus commodo at. In iaculis nisl vel pretium sollicitudin. In efficitur massa vel elit sollicitudin, vel auctor sapien cursus. Proin feugiat sapien a mi tempus;
+
+% \begin{equation}
+%        X-X'=D+D' 
+% \end{equation}
+% Augue sapien mattis leo, nec accumsan turpis quam at neque. Ut pellentesque velit sed
+% placerat cursus. Integer congue urna non massa dictum, a pellentesque arcu accumsan. Nulla
+% posuere, elit accumsan eleifend elementum, ipsum massa tristique metus, in ornare neque nisl sed
+% odio. Nullam eget elementum nisi. Duis a consectetur erat, sit amet malesuada sapien. Aliquam
+% nec sapien et leo sagittis porttitor at ut lacus. Vivamus vulputate elit vitae libero condimentum
+% dictum. Nulla facilisi. Quisque non nibh et massa ullamcorper iaculis.
+% Augue sapien mattis leo, nec accumsan turpis quam at neque. Ut pellentesque velit sed
+% placerat cursus. Integer congue urna non massa dictum, a pellentesque arcu accumsan. Nulla
+% posuere, elit accumsan eleifend elementum, ipsum massa tristique metus, in ornare neque nisl sed
+% odio. Nullam eget elementum nisi. Duis a consectetur erat, sit amet malesuada sapien. Aliquam
+% nec sapien et leo sagittis porttitor at ut lacus. Vivamus vulputate elit vitae libero condimentum
+% dictum. Nulla facilisi. Quisque non nibh et massa ullamcorper iaculis.
+
+
+% \begin{quote}
+%     \begin{singlespace}
+%   This is an example of a block quote. Aliquam mi nisi, tristique at rhoncus quis, consectetur non mi. Phasellus blandit quam ligula, a viverra lacus commodo at. 
+%     \end{singlespace}
+    
+% \end{quote}
+
+% \subsection{Subsection}
+
+% Aliquam mi nisi, tristique at rhoncus quis, consectetur non mi. Phasellus blandit quam ligula, a viverra lacus commodo at. In iaculis nisl vel pretium sollicitudin. In efficitur massa vel elit sollicitudin, vel auctor sapien cursus. Proin feugiat sapien a mi tempus;
+
+% \begin{equation}
+%     X-X'=D+D'
+% \end{equation}
+ 
+ 
+% Please note, the 'Objects' section of this document is based off of the Algorithm environment. If you wish to use external links to a repository, UF recommends using Zenodo (https://guides.uflib.ufl.edu/etds/supplemental). Please reach out to our office at TandDSupport-hd@ufl.edu if you have any questions about adding it to your document, and the ETD team at the library if you have any questions about external repositories (IRManager@uflib.ufl.edu).

@@ -1,0 +1,83 @@
+\chapter{Conclusion and Future Work}
+\label{chap:conclusion}
+
+This concluding section summarized the key findings from the methods introduced in this thesis and discusses their broader applications. Section~\ref{sec:summary_findings} highlights the primary contributions and outcomes from exploring DiffLogic models. Section~\ref{sec:limitations} acknowledges the current limitations encountered during research and the implementation of DiffLogic models. Section~\ref{sec:future_directions} explores promising areas for future research to further advance the transparency, efficiency, and applicability of DiffLogic in critical sectors. Finally, Section~\ref{sec:conclusion} provides the closing remarks emphasizing the significance of this work. 
+
+% This final chapter summarizes the contributions of the thesis, discusses its limitations, and outlines promising directions for future research.
+
+\section{Summary of Findings}
+\label{sec:summary_findings}
+
+The thesis demonstrates that the Differentiable Logic Gate Network architecture proposed by Felix Petersen is a promising path towards more transparent networks with performance comparable to that of current deep learning models on small tests. Through experimentation and practical implementations, such as FPGA deployment and logic compression via the MiniNet algorithm, this work validated that DiffLogic networks maintain competitive performance with traditional neural networks, while significantly improving interpretability. Additionally, visualization tools like SaliencySlider and DiffLogicVisualizer have been developed, enhancing our ability to understand the internal decision processes of these logic-based models.
+
+\section{Limitations}
+\label{sec:limitations}
+
+Despite the clear benefits provided by DiffLogic, several limitations remain:
+
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \textbf{Scalability Issues}: While DiffLogic networks perform admirably on smaller datasets (such as MNIST and CIFAR-10), scaling them to larger, more complex datasets remains challenging. Increased dataset complexity requires substantially larger networks, complicating training and potentially diluting interpretability.
+
+\item \textbf{Discrete Approximation Error}: The continuous-to-discrete transition in DiffLogic can introduce approximation errors, potentially leading to minor performance degradation after discretization. While manageable so far, this becomes increasingly significant with larger or more nuanced models.
+
+\item \textbf{Training Instability}: The differentiable training process, though powerful, can exhibit instability and sensitivity to initialization and hyperparameter selection. Additionally, due to the connections in the model being fixed from the start, issues may arise with consistent optimization as network depth increases.
+
+\item \textbf{Computational Costs}: While DiffLogic models excel at inference with extremely fast decision making, they may take hundreds of times longer than regular ANNs to converge during training. This poses considerable computational training costs, especially when scaled beyond relatively shallow architectures, presenting challenges for broader adoption.
+\end{itemize}
+
+\section{Future Directions}
+\label{sec:future_directions}
+
+Many research avenues could enhance the efficiency and interpretability of DiffLogic:
+
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \textbf{Building Block Identification}: As DiffLogic networks scale to millions of parameters, understanding individual logic gates becomes infeasible for humans. Therefore, an intriguing direction involves traversing trained DiffLogic networks to identify larger, interpretable combinational blocks (e.g., recognizing combinations of gates as known modules such as Half-Adders or Full-Adders). By abstracting these emergent structures, a higher-level understanding and more intuitive interpretability may be achieved.
+
+\item \textbf{Scaling to Large Scale Applications}: Efficiently scale DiffLogic networks to larger and more complex datasets beyond MNIST to expand their real world applicability.
+
+\item \textbf{Larger FPGA Implementations}: While this work demonstrated the initial advantages and the feasibility of deploying DiffLogic models onto FPGAs, further work must be done with larger trained models as well as larger FPGAs.
+
+\item \textbf{MiniNets onto FPGAs}: Although this work introduces the concept of MiniNets and the deployment of DiffLogic models onto FPGA hardware, it has yet to leverage both at the same time. Further work seeks to implement the reduced DiffLogic models onto FPGAs.
+
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+% can probably also mention genetic algorithms as future work
+This thesis depicts DiffLogic as an efficient and transparent potential alternative to traditional neural networks. By explicitly addressing the gap in explainability present in Petersen et al.'s initial work, along with hardware deployment, the thesis lays groundwork for significant future contributions. Pursuing identified future directions—--including combinational block recognition, hardware optimizations with MiniNets, and more polished visualization tools--—DiffLogic has considerable potential to be a solution to the black box problem in present artificial intelligence systems.
+
+% \textbf{MiniNet Future Work}
+
+% Overall, the MiniNet approach validates that DiffLogic networks contain a significant amount of compressible structure. The differentiable training identifies a functional logic configuration, followed by post-processing that refines it into a more compact equivalent. This two-stage process (learning followed by compression) leverages the strengths of gradient descent to find an approximate solution and the strengths of logical reasoning to refine that solution.
+
+% Integrating compression into training, such as adding a penalty for the number of gates or encouraging gate reuse, presents an interesting direction for future work albeit this remains a separate phase for now. Additionally, future exploration could focus on constructing larger building blocks from smaller components. For example, the system could identify that an AND gate combined with an XOR gate form a HALF-ADDER, as well as other higher-level structures. This aspect relates closely to explainability and visualization, as it would enable a clearer understanding of how complex logical functions emerge from simpler primitives.
+
+% % Placeholder table, will fill it out as I verify the gates that make up each of the combinational blocks
+
+% \begin{table}[h]
+% \centering
+% \begin{tabular}{|c|c|}
+% \hline
+% \textbf{Combinational Block} & \textbf{Constituent Gates} \\
+% \hline
+% Half Adder & 1 XOR, 1 AND \\
+% \hline
+% Full Adder & 2 XOR, 2 AND, 1 OR \\
+% \hline
+% 2-to-1 Multiplexer & 2 AND, 1 OR, 1 NOT \\
+% \hline
+% 2-to-4 Decoder & 4 AND, 2 NOT \\
+% \hline
+% 4-to-2 Encoder & 2 OR \\
+% \hline
+% 1-bit Magnitude Comparator & 3 AND, 1 OR, 2 NOT \\
+% \hline
+% \end{tabular}
+% \caption{Construction of Larger Combinational Blocks from Basic Logic Gates}
+% \label{tab:combinational_blocks}
+% \end{table}
+
+% Further Bigger blocks from these Combinational Blocks above. The theoretical goal is to abstract the lower level logic gates such that it is interpretable to humans but it is in terms of logic circuits that are transparent and can be decomposed if needed.
+
+

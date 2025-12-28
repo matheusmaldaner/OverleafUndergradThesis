@@ -1,0 +1,408 @@
+% This is the abstract tex file, which should have been set in the main file using the command \verb|\setAbstractFile{Drive:/file/location/abstractFile}|.
+
+Despite their remarkable capabilities, the decision-making process of deep neural networks remains a black box, obscuring the logic behind model decisions and undermining trust in critical domains such as healthcare, national security, and law. While the field of Explainable Artificial Intelligence (XAI) has emerged to mitigate these issues, current post hoc explanation methods often fail to deliver reliable insights as they are applied after a model has been trained, rather than addressing the underlying architecture. To overcome these fundamental limitations, this thesis explores Differentiable Logic Gate Networks (DiffLogic), a type of neurosymbolic AI (NSAI) architecture that enables neural networks to learn a distribution of logic gates for each node. Although DiffLogic was originally introduced with a focus on accelerating inference speeds, its potential for explainability has remained largely unexplored. Specifically, this work seeks to address these gaps by: (1) implementing DiffLogic on Field Programmable Gate Arrays (FPGA) for hardware acceleration, (2) developing a compression algorithm for DiffLogic models, and (3) deploying visualization tools to intuitively interpret learned logical structures. 
+
+% a mention that DiffLogic's authors did not focus on its explainability potential and rather solely on speed
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%\authorRemark{Notes: ensure things are not in first person}
+
+\chapter{Introduction}
+\label{chap:introduction}
+
+While there have been impressive advances in artificial intelligence in recent years, modern AI systems remain fundamentally flawed, lacking transparency and true reasoning capabilities \cite{jiang2024peektokenbiaslarge}. Despite breakthroughs in natural language processing \cite{nlp_deep_learning_survey}, computer vision \cite{cv_deep_learning_survey}, and reinforcement learning \cite{rl_deep_learning_survey}, deep learning models continue to operate as opaque black boxes, offering little transparency into how or why decisions are made. Furthermore, while recent work on chain-of-thought has improved model performance \cite{wei2023chainofthoughtpromptingelicitsreasoning}, it gives the illusion that large language models are capable of actual ``reasoning'' through genuine logical inference and generalization rather than relying solely on statistical pattern matching \cite{bastounis2024consistentreasoningparadoxintelligence, li202512surveyreasoning, cherian2023deepneuralnetworkssmarter}. As a result, AI remains untrustworthy in high-stakes environments that deal with human lives, as it is prone to hallucinations \cite{maleki2024aihallucinationsmisnomerworth}, biases \cite{simhi2025trustmeimwrong, echterhoff2024cognitivebiasdecisionmakingllms}, and inexplicable errors \cite{rogha2023explaindecidehumancentricreview}. Without an explicit mechanism for structured reasoning and transparency, deep learning will continue to encounter significant challenges in environments that demand reliability, interpretability, and real-time decision making.
+
+This current lack of transparency in AI systems gives way to fields such as Explainable Artificial Intelligence (XAI), which has become increasingly important as AI systems are deployed in high-stakes and decision-critical domains. Black-box models, especially deep neural networks with millions of parameters, often lack transparency, making it difficult for users to trust their decisions. The AI community recognizes that explainability is a crucial feature for the practical deployment of AI models, as it helps overcome the opaqueness and complexity presented by subsymbolic learning techniques and ensure AI models deployed in critical sectors can be trusted.
+In response, XAI research has produced methods to interpret model predictions, ranging from visualization of learned features to extraction of human-understandable rules \cite{interpreting-nns}. These methods aim to build user trust by shedding light on how inputs affect outputs, thus moving towards Responsible AI \cite{baker2023explainableairesponsibleai}. However, post hoc (techniques applied after a model is trained) XAI methods remain fundamentally flawed, as they attempt to interpret models that are inherently uninterpretable \cite{inscrutable_xai_algorithms}. 
+
+% Studies have shown that such techniques often provide misleading or incomplete explanations \cite{inscrutable_xai_algorithms}, reinforcing the need for intrinsic interpretability.
+
+A promising approach to address these limitations is Neurosymbolic AI (NSAI) \cite{sarker2021neurosymbolicartificialintelligencecurrent}. NSAI integrates subsymbolic (neural) and symbolic paradigms, combining data-driven machine learning with structured symbolic reasoning. Neural networks excel at recognizing patterns but remain opaque, while symbolic systems provide logical clarity but struggle with adaptability. By merging these two approaches, NSAI aims to create AI systems that are both inherently interpretable and scalable \cite{zhang2024neurosymbolicaiexplainabilitychallenges, sheth2023neurosymbolicaiwhy}. 
+
+This thesis focuses on a type of NSAI architecture called Differentiable Logic Gate Networks \cite{difflogic} and develops upon it through the following novel contributions:
+
+\begin{enumerate}[noitemsep,topsep=0pt]
+
+     \item \textbf{FPGA-Based Deployment of DiffLogic:} Implemented DiffLogic models on Field Programmable Gate Arrays (FPGAs), demonstrating real-time inference capabilities that significantly increase speeds.
+    \item \textbf{MiniNet Compression Algorithm:} Developed a method for reducing the size of trained Differentiable Logic Gate Networks while preserving their accuracy and improving efficiency.
+    \item \textbf{Visualization Interface for Interpretability:} Designed a tool that visualizes the logic structures learned by DiffLogic and a separate tool that generates saliency maps with different XAI algorithms for comparison, making model decisions more accessible and understandable for human users.
+\end{enumerate}
+
+To structure this exploration, Chapter \ref{chap:background} goes over limitations of current AI systems, arguments against purely connectionist models, the promise of neurosymbolic approaches, and a detailed explanation of DiffLogic Networks. Chapter \ref{chap:methods} outlines the methods, including experiments run using the base DiffLogic network, hardware deployment via FPGAs, compression into MiniNets, and the development of visualization tools. Chapter \ref{chap:results} presents experimental results and comparisons across all approaches. Chapter \ref{chap:conclusion} concludes the thesis by summarizing key findings, discussing limitations, and proposing future research directions, particularly in expanding interpretability and efficiency.
+
+%\authorRemark{Notes: ensure things are not in first person}
+
+\chapter{Introduction}
+\label{chap:introduction}
+
+While there have been impressive advances in artificial intelligence in recent years, modern AI systems remain fundamentally flawed, lacking transparency and true reasoning capabilities \cite{jiang2024peektokenbiaslarge}. Despite breakthroughs in natural language processing \cite{nlp_deep_learning_survey}, computer vision \cite{cv_deep_learning_survey}, and reinforcement learning \cite{rl_deep_learning_survey}, deep learning models continue to operate as opaque black boxes, offering little transparency into how or why decisions are made. Furthermore, while recent work on chain-of-thought has improved model performance \cite{wei2023chainofthoughtpromptingelicitsreasoning}, it gives the illusion that large language models are capable of actual ``reasoning'' through genuine logical inference and generalization rather than relying solely on statistical pattern matching \cite{bastounis2024consistentreasoningparadoxintelligence, li202512surveyreasoning, cherian2023deepneuralnetworkssmarter}. As a result, AI remains untrustworthy in high-stakes environments that deal with human lives, as it is prone to hallucinations \cite{maleki2024aihallucinationsmisnomerworth}, biases \cite{simhi2025trustmeimwrong, echterhoff2024cognitivebiasdecisionmakingllms}, and inexplicable errors \cite{rogha2023explaindecidehumancentricreview}. Without an explicit mechanism for structured reasoning and transparency, deep learning will continue to encounter significant challenges in environments that demand reliability, interpretability, and real-time decision making.
+
+This current lack of transparency in AI systems gives way to fields such as Explainable Artificial Intelligence (XAI), which has become increasingly important as AI systems are deployed in high-stakes and decision-critical domains. Black-box models, especially deep neural networks with millions of parameters, often lack transparency, making it difficult for users to trust their decisions. The AI community recognizes that explainability is a crucial feature for the practical deployment of AI models, as it helps overcome the opaqueness and complexity presented by subsymbolic learning techniques and ensure AI models deployed in critical sectors can be trusted.
+In response, XAI research has produced methods to interpret model predictions, ranging from visualization of learned features to extraction of human-understandable rules \cite{interpreting-nns}. These methods aim to build user trust by shedding light on how inputs affect outputs, thus moving towards Responsible AI \cite{baker2023explainableairesponsibleai}. However, post hoc (techniques applied after a model is trained) XAI methods remain fundamentally flawed, as they attempt to interpret models that are inherently uninterpretable \cite{inscrutable_xai_algorithms}. 
+
+% Studies have shown that such techniques often provide misleading or incomplete explanations \cite{inscrutable_xai_algorithms}, reinforcing the need for intrinsic interpretability.
+
+A promising approach to address these limitations is Neurosymbolic AI (NSAI) \cite{sarker2021neurosymbolicartificialintelligencecurrent}. NSAI integrates subsymbolic (neural) and symbolic paradigms, combining data-driven machine learning with structured symbolic reasoning. Neural networks excel at recognizing patterns but remain opaque, while symbolic systems provide logical clarity but struggle with adaptability. By merging these two approaches, NSAI aims to create AI systems that are both inherently interpretable and scalable \cite{zhang2024neurosymbolicaiexplainabilitychallenges, sheth2023neurosymbolicaiwhy}. 
+
+This thesis focuses on a type of NSAI architecture called Differentiable Logic Gate Networks \cite{difflogic} and develops upon it through the following novel contributions:
+
+\begin{enumerate}[noitemsep,topsep=0pt]
+
+     \item \textbf{FPGA-Based Deployment of DiffLogic:} Implemented DiffLogic models on Field Programmable Gate Arrays (FPGAs), demonstrating real-time inference capabilities that significantly increase speeds.
+    \item \textbf{MiniNet Compression Algorithm:} Developed a method for reducing the size of trained Differentiable Logic Gate Networks while preserving their accuracy and improving efficiency.
+    \item \textbf{Visualization Interface for Interpretability:} Designed a tool that visualizes the logic structures learned by DiffLogic and a separate tool that generates saliency maps with different XAI algorithms for comparison, making model decisions more accessible and understandable for human users.
+\end{enumerate}
+
+To structure this exploration, Chapter \ref{chap:background} goes over limitations of current AI systems, arguments against purely connectionist models, the promise of neurosymbolic approaches, and a detailed explanation of DiffLogic Networks. Chapter \ref{chap:methods} outlines the methods, including experiments run using the base DiffLogic network, hardware deployment via FPGAs, compression into MiniNets, and the development of visualization tools. Chapter \ref{chap:results} presents experimental results and comparisons across all approaches. Chapter \ref{chap:conclusion} concludes the thesis by summarizing key findings, discussing limitations, and proposing future research directions, particularly in expanding interpretability and efficiency.
+
+
+%%%%%%%%%%%%%%%%%%
+
+\chapter{Background}
+\label{chap:background}
+
+This section provides the background and motivation behind selecting DiffLogic models as the central focus of this thesis. Section~\ref{sec:sec_criticalsectors} discusses the limitations of traditional deep learning models in domains that require explainability. Section~\ref{sec:sec_xai} presents the broader field of Explainable AI (XAI), exploring both its methods and current shortcomings. Section~\ref{sec:sec_xai} introduces Neurosymbolic AI (NSAI) as a promising alternative approach that combines neural networks with symbolic reasoning. Finally, Section~\ref{sec:sec_difflogic} explores Differentiable Logic Gate Networks (DiffLogic), a specific type of neurosymbolic AI which serves as the primary focus of this thesis.
+
+\section{Barriers for Deployment in Critical Sectors}
+\label{sec:sec_criticalsectors}
+
+Most modern AI systems that have gained popularity in recent years fall into the category of deep neural networks, large fully connected networks of continuous operations that often behave as ``black boxes'' as their internal decision-making processes are opaque even to their creators \cite{black_boxes}. This occurs because, after programmers establish initial parameters, the system learns autonomously from data, adjusting its internal settings in ways that are not easily interpretable. This limits the adoption of these powerful algorithms in critical sectors where human lives may be impacted. 
+
+In healthcare, this opacity undermines trust, as doctors may be hesitant to rely on a diagnostic that they cannot interpret or explain to patients, due to ethical ``do no harm'' obligations \cite{transparency_ai_in_healthcare}, pointing to lack of transparency as the main barrier to implementation \cite{Markus_2021}. In finance, lack of transparency poses regulatory and ethical challenges---while banks may use black-box models for credit decisions, they are unable to explain why a loan was denied, risking violations of laws like the Fair Credit Reporting Act \cite{maple2023airevolutionopportunitieschallenges}. In national security contexts, the opaqueness of black-box AI systems can undermine strategic decision-making. When defense or intelligence agencies rely on algorithms whose internal processes are inaccessible, commanders and policymakers are left unable to trace how outputs were generated, potentially compromising mission-critical judgments \cite{yu2022implications}. Similar to how opaque AIs in autonomous vehicles have raised concerns over accountability in public safety \cite{li2023knowledgedrivenautonomousdriving}, the unpredictable behavior of these models in military applications creates a trust gap—national security stakeholders fear ``inscrutable'' systems that may behave erratically, overlook emerging threats, or embed unrecognized biases \cite{HollandMichel2020TheBB, Hagos2024NeuroSymbolicAF}. This lack of transparency also makes it easier for ineffective predictive AI solutions, commonly referred to as ``AI snake oil'' \cite{snakeoil}, to be marketed deceptively to critical sectors.
+
+
+% Many predictive AI solutions are sold by companies as guaranteed fixes to complex problems while failing to deliver on their promises, leading to a phenomenon commonly referred to as ``AI snake oil. \cite{snakeoil}.'' 
+
+% Having model explanations in these cases would make it easier to identify such ineffective or misleading products \cite{snakeoil}
+
+\section{Explainable AI and Post-Hoc Limitations}
+\label{sec:sec_xai}
+
+To address transparency concerns in AI deployment, the field of Explainable AI (XAI) gained popularity, offering post-hoc explanation techniques to tackle black-box models. Popular methods include LIME, which provides local surrogate models to explain individual predictions \cite{ribeiro2016whyitrustyou}, and SHAP, which assigns importance scores to features \cite{lundberg2017unifiedapproachinterpretingmodel}. 
+
+While these tools help interpret complex models, researchers have found that post-hoc explanations are often inadequate or misleading. For one, these explanations are imprecise---creating simplified interpretive models that may not perfectly match the actual network’s workings. Recent studies demonstrated that adversarial tweaks can deceive LIME and SHAP, as a model can be engineered to use a certain feature for its decision while tricking LIME or SHAP into showing that feature as unimportant \cite{slack2020foolinglimeshapadversarial}. In other words, a clever (or accidental) configuration can ``generate deliberately misleading explanations'' that make a biased or erroneous model appear fair \cite{slack2020foolinglimeshapadversarial}. This questions the reliability of post-hoc explainers for auditing AI---if they can be gamed, they can't be fully trusted to detect bias or error.
+
+% This calls into question the reliability of such post-hoc explainers for auditing AI behavior---if an explanation method can be gamed, one cannot fully trust it to detect biases or errors.
+
+Another limitation is faithfulness, as post-hoc methods often highlight correlations rather than true causal reasons. Moreover, these explanations can be difficult for non-experts to grasp---saliency maps or abstract feature attributions might not satisfy a doctor or lawyer asking ``Why did the AI make that decision?'' \cite{yeh2019infidelitysensitivityexplanations}. 
+
+As a result, post-hoc XAI alone is not a panacea for the black-box problem and there is growing consensus that AI models should be more interpretable by design, or at least deeply integrated with explanation mechanisms, rather than treating explainability as an afterthought.
+
+% To further illustrate the variability inherent in saliency map–based XAI methods, this thesis introduces SaliencySlider - a software tool that enables interactive exploration and comparison of different saliency map generating algorithms. SaliencySlider allows users to intuitively visualize and compare how various regions in an image contribute to a model's prediction, thereby highlighting both the potential and limitations of post-hoc explanation methods. Details on SaliencySlider are provided in Section \ref{sec:saliencyslider}.
+
+\section{Neurosymbolic AI}
+\label{sec:sec_nsai}
+
+The evolution of artificial intelligence has been marked by three distinct waves, each with its own strengths, limitations, and philosophical underpinnings. The First Wave of AI, often called Symbolic AI, dominated the field from the 1950s through the 1980s and was characterized by explicit knowledge representation, formal logic, and rule-based systems \cite{newell1956logic, McCarthy1969-MCCSPP}. Systems such as expert systems, decision trees, and early natural language processing tools relied on hand-coded rules and logical inference mechanisms to perform reasoning. While these methods provided transparency and structured reasoning, they lacked adaptability, required extensive manual encoding of domain knowledge, struggled with scalability, and failed to handle uncertain or incomplete data.
+
+The Second Wave of AI, referred to as Subsymbolic or Connectionist AI, emerged in the late 1980s and early 1990s, driven by the advent of statistical learning, neural networks, and, later, deep learning \cite{lecun2015deep}. The resurgence of neural networks, particularly with the rise of deep learning in the 2010s, led to remarkable achievements in fields such as computer vision, natural language processing, and reinforcement learning \cite{cv_deep_learning_survey, nlp_deep_learning_survey, rl_deep_learning_survey}. However, this wave introduced new challenges; While deep learning systems excel at pattern recognition and generalization from large datasets, they operate as black-box models, offering little interpretability in their decision-making processes \cite{zhang2024neurosymbolicaiexplainabilitychallenges}. Furthermore, these models rely on massive amounts of data and computational power and lack structured reasoning capabilities, making them brittle when faced with out-of-distribution data or tasks requiring logical inference \cite{marcus2020nextdecadeai}. Incidents revolving around hallucinations, biases, and inexplicable errors have fueled prominent critiques of today’s deep learning AI models. Gary Marcus, a cognitive scientist and outspoken AI skeptic, argues that current deep learning systems lack true understanding and reasoning. 
+
+Marcus’s ``Deep Learning: A Critical Appraisal'' \cite{marcus2018deeplearningcriticalappraisal} highlighted that modern AI is ``data-hungry, lacking transparency, unable to extrapolate, and difficult to engineer'' toward reliable intelligence. In other words, while a model like GPT-4 might perform well on benchmarks, it may fail at robust inference beyond the data it saw in training, often making absurd mistakes when confronted with novel inputs or slightly shifted problems. On top of that, recent studies have shown that some benchmarks are not as reliable as expected \cite{reuel2024betterbenchassessingaibenchmarks}. 
+
+In response to these limitations, researchers have proposed a Third Wave of AI, which aims to integrate neural learning with symbolic reasoning, resulting in NSAI \cite{garcez2023neurosymbolic, nsai_trends}. Neurosymbolic AI represents an attempt to bridge the gap between the first two waves by combining the structured reasoning and transparency of symbolic methods with the adaptability and pattern recognition capabilities of neural networks \cite{colelough2025neurosymbolicai2024systematic}. Luís Lamb and Artur d’Avila Garcez argue in their work ``Neurosymbolic AI: The 3rd Wave'' that the next generation of AI must be both explainable and capable of robust reasoning, requiring a structured fusion of symbolic knowledge representation with neural-based learning systems \cite{garcez2023neurosymbolic}. 
+
+At its core, a neurosymbolic system can be envisioned as learning from data like a deep neural network while also manipulating symbols and rules like a classical logic engine. This integration allows such systems to explain their conclusions, adhere to physical and ethical constraints, and perform logical inferences beyond their training data. The need for such hybrid approaches has become increasingly evident in safety-critical domains, as researchers argue that the black-box nature of current deep learning may make it a dead end for achieving robust, trustworthy AI \cite{refId0, marcus2022deeparticle}.  
+
+
+\section{Differentiable Logic Gate Networks}
+\label{sec:sec_difflogic}
+
+Neurosymbolic AI has seen a surge of innovative systems that blend learning and reasoning, such as DeepMind’s AlphaGeometry \cite{53097, chervonyi2025goldmedalistperformancesolvingolympiad}, Neural Logic Networks \cite{shi2019neurallogicnetworks}, and probabilistic logic frameworks like DeepProbLog, among others \cite{manhaeve2018deepproblogneuralprobabilisticlogic}. These approaches illustrate the diverse strategies for integrating neural networks with symbolic knowledge, from neural-guided theorem proving to differentiable logic programming. Within this evolving landscape, researcher and computer scientist Henry Kautz has proposed a taxonomy of six neurosymbolic categories to characterize such systems \cite{Kautz_2022}.
+
+In Kautz’s classification, DiffLogic can be placed into the category of $\text{Neuro:Symbolic} 
+\rightarrow \text{Neuro}$ integration, which denotes approaches that embed or compile symbolic logic structures directly into a neural network’s design. DiffLogic aligns with this description since it incorporates discrete logical operations (Boolean logic gates) as the functional units of a neural model, using continuous relaxations during training. In other words, a trained DiffLogic model is a logic circuit, making it a clear instance of a neural model performing symbolic reasoning within its structure. While the original DiffLogic authors did not explicitly classify their work as a NSAI approach, many AI methods are neurosymbolic in spirit despite not being labeled as such \cite{sarker2021neurosymbolicartificialintelligencecurrent}. Given DiffLogic's combination of neural training with symbolic logic components, it can be considered under the NSAI umbrella.
+
+Logic-based NSAI approaches are particularly attractive for building explainable AI systems because their internals have discrete, symbol-like structures that humans can interpret. The use of formal logic elements (predicates, rules, gates, etc.) embeds these models with symbolic interpretability, meaning that the learned representations or decision rules can often be translated into human-comprehensible logical statements. Consequently, numerous logic-centered NSAI frameworks have been explored in recent years. For example, Logic Tensor Networks and DeepProbLog combine neural learning with logical constraints or probabilistic logic programs \cite{Badreddine_2022, manhaeve2018deepproblogneuralprobabilisticlogic}. Similarly, systems like Logical Neural Networks \cite{riegel2020logicalneuralnetworks}, Logical Boltzmann Machines \cite{tran2021logicalboltzmannmachines}, Neural Logic Machine \cite{dong2019neurallogicmachines}, and more leverage logic reasoning with neural architectures to maintain a logical structure. These examples underscore a broader trend that by injecting logic into AI models, one can often achieve more transparent behavior without entirely sacrificing the benefits of neural learning. DiffLogic fits into this logic-based explainable paradigm as it uses actual logic gate operations as building blocks, offering the prospect that the learned model can be read as a set of logical transformations rather than opaque matrix multiplications.
+
+In a DiffLogic network, differentiable logic gates are used instead of traditional nonlinear artificial neurons. Each unit in the network takes two binary inputs and produces a binary output via some Boolean function (AND, OR, XOR, etc.). Importantly, rather than fixing a gate’s operation a priori, DiffLogic learns which of the 16 possible two-input Boolean operators should govern each neuron. During training, a continuous relaxation is used: each neuron maintains a probability distribution over all 16 logic gate types and updates these probabilities via gradient descent. This soft selection mechanism is differentiable, enabling standard backpropagation to gradually favor certain logic functions for each unit. Once training converges, the network is discretized by picking the most likely gate at each neuron, yielding a pure logic gate network. 
+
+DiffLogic was chosen as the foundation for this thesis because of their simplicity, hardware-friendliness, and promise of transparency. Unlike many complex neurosymbolic models, DiffLogic uses a relatively straightforward concept---learning a network of Boolean logic gates---which keeps the architecture and its reasoning processes easy to conceptualize. This simplicity makes it easier to analyze and extend the model to digital hardware. By design, a DiffLogic model after training is essentially a Boolean circuit, which can be directly mapped onto FPGAs or other logic hardware for highly efficient execution, being a major advantage over conventional neural nets that require power-hungry arithmetic. Finally, because each unit corresponds to a specific logic operation, there is a clear path toward model transparency since one can, in principle, inspect the learned gates and connections to understand the decision logic, making DiffLogic an ideal candidate for further research into explainable and efficient AI.
+
+
+
+% illustrates this idea: raw inputs (e.g. image pixels) are binarized and fed through layers of learned logic gates, and the final layer’s outputs (multiple binary votes per class) are aggregated, for instance by simple bit-counting, to produce class scores. Because the learned model uses only Boolean computations and fixed connections, it can execute remarkably fast - the original authors report throughput exceeding one million MNIST images per second on a single CPU core. The logic gate network is also extremely sparse (each neuron has only two inputs and one output), contributing to its efficiency. Petersen et al. primarily evaluated DiffLogic on classification tasks (image recognition on MNIST and CIFAR-10, tabular data, etc.), finding that it achieves accuracy on par with conventional neural networks while dramatically improving inference speed and reducing model size
+
+Although recent research has addressed some of these points \cite{explogic}, the original DiffLogic study focused primarily on performance metrics---inference speed, model size, and classification accuracy---without specifically addressing issues related to explainability or specialized hardware implementation beyond CPU timing. For example, on datasets with known underlying logic (such as the MONK’s problems), DiffLogic matched the accuracy of neural baselines, but there lacked analysis on whether the learned gates corresponded to the expected logical rules. Similarly, while the architecture lends itself to hardware implementation, opportunities remain to investigate its deployment on specialized hardware, such as FPGAs.
+
+These gaps represent opportunities for extension: if DiffLogic truly yields human-understandable models and is built from digital-friendly components, one would expect to leverage those for both XAI insights and hardware acceleration. This thesis aims to fill those gaps by exploring the interpretability and hardware deployment of DiffLogic models.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\chapter{Results and Comparisons}
+\label{chap:results}
+
+% This chapter presents the experimental results obtained from the methods listed in the previous section.
+
+This section presents the experimental results corresponding to the three primary objectives outlined in Chapter~\ref{chap:methods}. Specifically, Section~\ref{sec:results_fpga} discusses the outcomes and performance improvements observed when deploying trained DiffLogic models onto FPGA hardware. Section~\ref{sec:results_compression} evaluates the effectiveness of the MiniNet compression algorithm in reducing network complexity without compromising accuracy. Finally, Section~\ref{sec:results_visualization} describes the development and initial results obtained from two novel visualization tools aimed at enhancing model interpretability.
+
+\section{Results from Deploying Learned Logic on Hardware}
+\label{sec:results_fpga}
+
+
+
+%% !! CAN ADD THE FOLLOWING PARTS ON THE METHODS SECTION, BUT MIGHT BE TOO MUCH
+% A key question is how an FPGA implementation of DiffLogic compares to inference on a conventional GPU. Although GPUs are highly optimized for massive parallel arithmetic, they are less specialized for arbitrary logic. Since DiffLogic inference on a CPU already operates efficiently at the bit level, the benefit of mapping to an FPGA is not guaranteed. Nonetheless, four dimensions inform this comparison:
+
+% \begin{itemize}[noitemsep,topsep=0pt]
+%     \item \textbf{Latency:} On an FPGA, latency depends on signal propagation through logic (tens of nanoseconds). On a GPU, overheads include kernel launch and possible memory transfers.
+%     \item \textbf{Throughput:} An FPGA clocked at 50\,MHz can achieve up to
+%     50~million inferences per second when fully pipelined. GPUs, however, can also process millions of inferences in parallel batches.
+%     \item \textbf{Parallelism:} An FPGA can instantiate multiple copies of the circuit (as resources allow), whereas a GPU leverages SIMD data parallelism.
+%     \item \textbf{Energy Efficiency:} FPGAs are generally more power-efficient for fixed logic operations, especially if the GPU is underutilized.
+% \end{itemize}
+
+An important question addressed is how FPGA implementations of DiffLogic compare to traditional GPU-based inference, as DiffLogic models are inherently composed of logic gates, making FPGA implementations suitable as they are optimized for logic operations. GPUs, while highly optimized for arithmetic parallelism, tend to be less efficient with arbitrary logic typical in DiffLogic models. Given the already efficient bit-level CPU implementation of DiffLogic, it was important to empirically assess whether mapping these logic-gate-based models onto an FPGA would yield meaningful performance gains.
+
+Twenty-five trained DiffLogic models with varying node counts were evaluated to measure inference scalability. Two deployment modes were tested:
+(i) GPU-based DiffLogic inference,
+(ii) FPGA-based Boolean circuit synthesis.
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{fpga-graph-1.png}
+        \caption{Decrease in inference time vs. number of nodes.}
+        \label{fig:graph1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{fpga-graph-2.png}
+        \caption{Inference time between GPU and FPGA}
+        \label{fig:graph2}
+    \end{subfigure}
+    \caption{Comparison of model inference improvements.}
+    \label{fig:fpga_comparison}
+\end{figure}
+
+
+Table~\ref{tab:fpga_comparison} compares inference times, highlighting significant FPGA speedups. As network sizes grow, FPGA implementations increasingly outperform GPUs, achieving up to 78\% reductions in inference time for the largest models tested. Figure~\ref{fig:graph1} (left) illustrates this relationship, demonstrating a strong correlation ($R^2=0.9283$) that suggests FPGA advantages grow with network size. The right panel of Figure~\ref{fig:graph2} (right) further emphasizes FPGA latency improvements over GPU implementations. Additionally, it is noted that the largest tested network occupying only about 13\% of available LUTs, thus permitting additional logic or multiple circuit instances.
+
+\begin{table}[htbp]
+\caption{Inference Time: GPU-Based vs. FPGA-Based DiffLogic Networks}
+\label{tab:fpga_comparison}
+\begin{tabularx}{\textwidth}{lXXX}
+\hline
+Nodes & DiffLogic ($\mu$s) & FPGA ($\mu$s) & \% Decrease \\
+\hline
+51,200   & 365.7   & 139.46 & 62\% \\
+614,400  & 724.28  & 280.52 & 74\% \\
+819,200  & 907.78  & 202.54 & 78\% \\
+1,108,160 & 1086.52 & 239.64 & 78\% \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+Given that DiffLogic on GPUs already significantly outperforms standard deep neural networks~\cite{difflogic}, the observed FPGA speedups are especially notable. Future research will further explore scalability beyond one million nodes, examine energy consumption, memory efficiency, and investigate pipeline optimization strategies. Overall, FPGA deployment of DiffLogic offers substantial improvements in inference latency, particularly valuable for real-time and resource-constrained applications.
+
+
+% The DE10-Lite board allows mapping of inputs (such as DIP switches or GPIO pins) to the circuit’s input ports and uses on-board LEDs or external interfaces for outputs. In one demonstration, an emulated RAM was controlled via DIP switches to provide a pre-loaded image’s bits as inputs. For more exhaustive validation, the generated Verilog code can be testbenched in ModelSim, supplying synthetic input frames and examining intermediary signals for debugging purposes.
+
+% \textbf{FPGA Synthesis, Timing, and Deployment}
+
+% Synthesis is conducted using Intel’s Quartus Prime software to confirm that the purely combinational circuit (unless registers are added for pipelining) fits within the DE10-Lite’s 22{,}320 logic elements. Typical DiffLogic networks require a few hundred to a few thousand two-input LUTs, remaining well within capacity. A 50\,MHz timing constraint was introduced to ensure the combinational path (up to about ten logic levels) meets a 20\,ns propagation requirement, which was met successfully.
+
+% Following synthesis, the bitstream is programmed onto the DE10-Lite, transforming the FPGA into a hardware embodiment of the learned model. Each inference is then a direct propagation of signals through these gates, effectively bypassing the need for multipliers or large memory blocks common in other neural network FPGA designs. Quartus reports indicate that even the largest tested network occupies only about 13\% of the LUTs with minimal routing congestion, leaving headroom for additional instances or other logic.
+
+% Although clocking is not strictly necessary for pure combinational logic, the DE10-Lite’s design requires a clock when interfacing with on-board RAM or other peripherals, limiting input switching to around 50\,MHz in practice. This constraint did not pose a problem for manually controlled inputs, and preliminary indications suggest that power consumption for a small combinational network on FPGA is substantially lower than GPU-based inference, reinforcing the suitability of this approach for low-power or edge-centric scenarios.
+
+
+
+
+
+\section{Results from Compressing Trained DiffLogic Networks}
+\label{sec:results_compression}
+
+Although FPGA implementations of DiffLogic provide fast inference, the full, uncompressed models (``parent models'') are large and contain many rarely activated gates. To improve efficiency, the MiniNet compression algorithm (Section \ref{sec:mininets}) prunes these infrequently used gates, maintaining essential decision-making structures. This yields models that are computationally simpler, faster, and more interpretable.
+
+To evaluate MiniNet performance, five DiffLogic models with varying layers and nodes were trained until surpassing 90\% accuracy on a binarized MNIST dataset (cropped to 20x20 pixels, 80-20 train-test split, learning rate of 0.01, grad factor = 1, temperature parameter $\tau=10$). The selected network had two layers of 2500 nodes each, reaching 91.2\% accuracy. While larger DiffLogic models achieve state-of-the-art performance \cite{difflogic}, this research prioritizes interpretability through smaller models. Future work aims to assess MiniNet performance on larger networks.
+
+\begin{table}[htbp]
+\caption{MiniNet Performance Compared to the Parent DiffLogic Network with 5010 gates}
+\label{tab:mininets}
+\begin{tabularx}{\textwidth}{lXXXXXXX}
+\hline
+Class & \% Time Red & \% Size Red & Accuracy & Precision & Recall & F1 \\
+\hline
+Class 0 & -9.8\% & -85.5\% & 97.2\% & 79.2\% & 11.1\% & 0.87 \\
+Class 1 & -10.0\% & -85.6\% & 98.6\% & 89.5\% & 10.9\% & 0.93 \\
+Class 2 & -10.1\% & -85.5\% & 94.2\% & 64.7\% & 10.9\% & 0.76 \\
+Class 3 & -10.2\% & -85.5\% & 94.0\% & 63.5\% & 11.2\% & 0.76 \\
+Class 4 & -10.1\% & -85.6\% & 95.0\% & 68.2\% & 11.0\% & 0.79 \\
+Class 5 & -10.1\% & -85.5\% & 93.4\% & 61.5\% & 10.8\% & 0.74 \\
+Class 6 & -10.1\% & -85.5\% & 96.7\% & 76.6\% & 11.1\% & 0.85 \\
+Class 7 & -10.1\% & -85.5\% & 96.1\% & 74.0\% & 10.7\% & 0.83 \\
+Class 8 & -10.2\% & -85.5\% & 90.4\% & 51.2\% & 10.9\% & 0.65 \\
+Class 9 & -10.3\% & -85.5\% & 91.9\% & 55.8\% & 11.1\% & 0.70 \\
+Average & -10.0\% & -86.0\% & 94.8\% & 68.4\% & 11.0\% & 0.79 \\
+$\pm$ Std. & $\pm$0.1\% & $\pm$0.1\% & $\pm$2.5\% & $\pm$11.5\% & $\pm$0.1\% & $\pm$0.085 \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+Initial tests with a DiffLogic model containing 5010 gates (two layers of 2500 gates and 10 output nodes) shown in Table~\ref{tab:mininets} demonstrated that MiniNets achieved class-score inference in 337$\mu$s on average and a one-versus-all accuracy of 94.8\%. Notably, this accuracy surpassed the parent model’s due to increased true negatives per class.
+
+Additionally, MiniNet compression significantly reduces model complexity, achieving approximately 86\% reduction in size and a 10\% average reduction in inference time. Consequently, only around 14\% of the original gates are needed per class-specific prediction, facilitating faster inference.
+
+
+
+% However, these efficiency gains a modest trade-off, with MiniNet accuracy dropping by approximately 3.8% compared to the parent model. Nonetheless, reduced computational demands and improved interpretability justify this compromise, particularly in resource-constrained or interpretability-critical scenarios.
+
+% Overall, MiniNet effectively eliminates extraneous logic gates, substantially reducing model complexity and inference times. The slight accuracy decline is acceptable, given the substantial gains in efficiency and interpretability.
+
+
+
+
+
+
+
+% maybe run some experiments on different thresholds. I remember we used different approaches towards creating MiniNets, as the one I used was based on counting the Switching Probability for a specific gate and defining a hyperparameter myself. e.g. if the switching probability of a gate was > 80%, the gate would be kept and automatically keep any previous gates that connect to it from previous layers.
+% Some experiments, tables, etc on different datasets (we have 2 datasets we used previously)
+
+
+\section{Results from Developing Visualization Software}
+\label{sec:results_visualization}
+
+Together, the two developed visualization tools, SaliencySlider and DiffLogicVisualizer, illustrate two complementary approaches to explainable AI. SaliencySlider reveals salient pixel-level features in conventional CNNs with general saliency algorithms, and DiffLogicVisualizer illuminates the inner workings of specific DiffLogic Networks. This section outlines the technical development of both approaches.
+
+\subsection{SaliencySlider Development}
+\label{sec:saliencySlider_results}
+
+Preliminary usage of SaliencySlider shows enhancement in the interpretability of large CNNs by offering real-time, interactive exploration which to the author's knowledge is not seen anywhere else. Users can see whether the CNN was focusing on relevant object features (e.g., the soccer ball) or extraneous background elements across several different techniques simultaneously as seen in Figure \ref{fig:saliencyslider}.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.7\linewidth]{saliencyslider.png}}    \caption{Interface of the SaliencySlider web tool demonstrating saliency overlays.}
+    \label{fig:saliencyslider}
+\end{figure}
+
+% \begin{enumerate}[noitemsep,topsep=0pt]
+%     \item \textbf{Image Preprocessing:} Uploaded images are resized and normalized to match the input requirements of VGG19. 
+%     \item \textbf{Saliency Calculation:} A gradient-based XAI algorithm (e.g., Grad-CAM) computes an importance map of each pixel’s contribution to the predicted class.
+%     \item \textbf{Overlay Generation:} The importance map is transformed into a heatmap overlay, which highlights the most critical regions of the input image.
+%     \item \textbf{Interactive Slider:} A user-controlled slider modulates the overlay’s visibility, gradually revealing or obscuring salient regions. This feature allows users to observe how the CNN’s interpretation evolves from minimal saliency to full image context.
+%     \item \textbf{Deployment Architecture:} A Django backend runs the model inference, while a JavaScript/React-based frontend handles dynamic rendering of saliency overlays. For flexible hosting, SaliencySlider can be containerized via Docker and deployed on platforms such as Amazon Lightsail Container.
+% \end{enumerate}
+
+Although the tool facilitates understanding of saliency-based features, it is important to reiterate that post hoc XAI explanations do not guarantee faithful insights into deep neural network models. Saliency maps depict correlations rather than causal logic, and they can be influenced by adversarial noise or spurious data patterns \cite{adebayo2022posthocexplanationsineffective, explogic}. Nevertheless, SaliencySlider addresses a recognized gap in existing XAI tools by providing a single modular interface where users can compare an array of different saliency methods side-by-side, making it easy to incorporate new algorithms as they are developed.
+
+
+\subsection{DiffLogicVisualizer Development}
+
+\label{sec:diffLogicVisualizer_results}
+
+Preliminary usage confirms that the \textit{DiffLogicVisualizer} software enhances the transparency of the model in a user-friendly way. Presenting the network’s logical layout reduces the ``black box'' perception commonly associated with neural networks, especially in regulated environments and within less technically proficient users. Users who observe the DAG representation can trace specific inputs through multiple logic gates to the final output, as well as seeing the probability of certain gates activating, thus gaining a clearer sense of how the model interprets the input data, as seen in Figure  \ref{fig:difflogic_figure}.
+
+Beyond interpretability, \textit{DiffLogicVisualizer} may also serve as a diagnostic tool to refine DiffLogic architectures, as by observing the topological complexity or the prevalence of redundant paths or gate types, engineers may visually spot candidates for gate reduction or merging, relating to the concept of MiniNets explored in Section \ref{sec:mininets}. In this manner, the visualization software can be thought of as a different approach in helping less-technical users identify the inner workings of the DiffLogic networks and which gates may be important.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.934\linewidth]{difflogicvisualizer.png}}    
+    \caption{Interface of DiffLogicVisualizer, demonstrating a network with 2 layers.}
+    \label{fig:difflogic_figure}
+\end{figure}
+
+
+
+
+%%%%%%%%%%%%%%%%%
+
+
+
+
+\chapter{Conclusion and Future Work}
+\label{chap:conclusion}
+
+This concluding section summarized the key findings from the methods introduced in this thesis and discusses their broader applications. Section~\ref{sec:summary_findings} highlights the primary contributions and outcomes from exploring DiffLogic models. Section~\ref{sec:limitations} acknowledges the current limitations encountered during research and the implementation of DiffLogic models. Section~\ref{sec:future_directions} explores promising areas for future research to further advance the transparency, efficiency, and applicability of DiffLogic in critical sectors. Finally, Section~\ref{sec:conclusion} provides the closing remarks emphasizing the significance of this work. 
+
+% This final chapter summarizes the contributions of the thesis, discusses its limitations, and outlines promising directions for future research.
+
+\section{Summary of Findings}
+\label{sec:summary_findings}
+
+The thesis demonstrates that the Differentiable Logic Gate Network architecture proposed by Felix Petersen is a promising path towards more transparent networks with performance comparable to that of current deep learning models on small tests. Through experimentation and practical implementations, such as FPGA deployment and logic compression via the MiniNet algorithm, this work validated that DiffLogic networks maintain competitive performance with traditional neural networks, while significantly improving interpretability. Additionally, visualization tools like SaliencySlider and DiffLogicVisualizer have been developed, enhancing our ability to understand the internal decision processes of these logic-based models.
+
+\section{Limitations}
+\label{sec:limitations}
+
+Despite the clear benefits provided by DiffLogic, several limitations remain:
+
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \textbf{Scalability Issues}: While DiffLogic networks perform admirably on smaller datasets (such as MNIST and CIFAR-10), scaling them to larger, more complex datasets remains challenging. Increased dataset complexity requires substantially larger networks, complicating training and potentially diluting interpretability.
+
+\item \textbf{Discrete Approximation Error}: The continuous-to-discrete transition in DiffLogic can introduce approximation errors, potentially leading to minor performance degradation after discretization. While manageable so far, this becomes increasingly significant with larger or more nuanced models.
+
+\item \textbf{Training Instability}: The differentiable training process, though powerful, can exhibit instability and sensitivity to initialization and hyperparameter selection. Additionally, due to the connections in the model being fixed from the start, issues may arise with consistent optimization as network depth increases.
+
+\item \textbf{Computational Costs}: While DiffLogic models excel at inference with extremely fast decision making, they may take hundreds of times longer than regular ANNs to converge during training. This poses considerable computational training costs, especially when scaled beyond relatively shallow architectures, presenting challenges for broader adoption.
+\end{itemize}
+
+\section{Future Directions}
+\label{sec:future_directions}
+
+Many research avenues could enhance the efficiency and interpretability of DiffLogic:
+
+\begin{itemize}[noitemsep,topsep=0pt]
+\item \textbf{Building Block Identification}: As DiffLogic networks scale to millions of parameters, understanding individual logic gates becomes infeasible for humans. Therefore, an intriguing direction involves traversing trained DiffLogic networks to identify larger, interpretable combinational blocks (e.g., recognizing combinations of gates as known modules such as Half-Adders or Full-Adders). By abstracting these emergent structures, a higher-level understanding and more intuitive interpretability may be achieved.
+
+\item \textbf{Scaling to Large Scale Applications}: Efficiently scale DiffLogic networks to larger and more complex datasets beyond MNIST to expand their real world applicability.
+
+\item \textbf{Larger FPGA Implementations}: While this work demonstrated the initial advantages and the feasibility of deploying DiffLogic models onto FPGAs, further work must be done with larger trained models as well as larger FPGAs.
+
+\item \textbf{MiniNets onto FPGAs}: Although this work introduces the concept of MiniNets and the deployment of DiffLogic models onto FPGA hardware, it has yet to leverage both at the same time. Further work seeks to implement the reduced DiffLogic models onto FPGAs.
+
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+% can probably also mention genetic algorithms as future work
+This thesis depicts DiffLogic as an efficient and transparent potential alternative to traditional neural networks. By explicitly addressing the gap in explainability present in Petersen et al.'s initial work, along with hardware deployment, the thesis lays groundwork for significant future contributions. Pursuing identified future directions—--including combinational block recognition, hardware optimizations with MiniNets, and more polished visualization tools--—DiffLogic has considerable potential to be a solution to the black box problem in present artificial intelligence systems.
+
+% \textbf{MiniNet Future Work}
+
+% Overall, the MiniNet approach validates that DiffLogic networks contain a significant amount of compressible structure. The differentiable training identifies a functional logic configuration, followed by post-processing that refines it into a more compact equivalent. This two-stage process (learning followed by compression) leverages the strengths of gradient descent to find an approximate solution and the strengths of logical reasoning to refine that solution.
+
+% Integrating compression into training, such as adding a penalty for the number of gates or encouraging gate reuse, presents an interesting direction for future work albeit this remains a separate phase for now. Additionally, future exploration could focus on constructing larger building blocks from smaller components. For example, the system could identify that an AND gate combined with an XOR gate form a HALF-ADDER, as well as other higher-level structures. This aspect relates closely to explainability and visualization, as it would enable a clearer understanding of how complex logical functions emerge from simpler primitives.
+
+% % Placeholder table, will fill it out as I verify the gates that make up each of the combinational blocks
+
+% \begin{table}[h]
+% \centering
+% \begin{tabular}{|c|c|}
+% \hline
+% \textbf{Combinational Block} & \textbf{Constituent Gates} \\
+% \hline
+% Half Adder & 1 XOR, 1 AND \\
+% \hline
+% Full Adder & 2 XOR, 2 AND, 1 OR \\
+% \hline
+% 2-to-1 Multiplexer & 2 AND, 1 OR, 1 NOT \\
+% \hline
+% 2-to-4 Decoder & 4 AND, 2 NOT \\
+% \hline
+% 4-to-2 Encoder & 2 OR \\
+% \hline
+% 1-bit Magnitude Comparator & 3 AND, 1 OR, 2 NOT \\
+% \hline
+% \end{tabular}
+% \caption{Construction of Larger Combinational Blocks from Basic Logic Gates}
+% \label{tab:combinational_blocks}
+% \end{table}
+
+% Further Bigger blocks from these Combinational Blocks above. The theoretical goal is to abstract the lower level logic gates such that it is interpretable to humans but it is in terms of logic circuits that are transparent and can be decomposed if needed.
+
+

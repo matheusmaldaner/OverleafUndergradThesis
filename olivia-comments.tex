@@ -1,0 +1,56 @@
+***Adding Olivia's comments here so I (Matheus) can address them individually***
+
+--------------------------------------------------------
+
+\textbf{Comments that should probably be addressed soon:
+}
+
+- May want to consider changing name of MiniNet, looks like name is already used for something else and may be copyrighted (https://mininet.org/)
+--- *Double check if this is truly an issue*
+
+- Noticed you have quite a few github links in your doc, might be good to consider getting/using permalinks (e.g. Zenodo doi)
+--- *Ask about how this works with the "release" option*
+
+- Alg 3.1-3.4 should be flowcharts/process diagrams if possible (see stephen’s paper, figs 3, 5, and 6 as examples). This will make it easier for Forte and Woodard to review
+--- *Will work on this after first submission, no time before the 30th to make figures* 
+
+- SaliencySlider doesn’t seem to fit in this particular body of work. DiffLogic on FPGA, MiniNet, and DiffLogicVisualizer all make sense together as they all relate to DiffLogic in a cohesive story; it would be good to see if there’s a way incorporate SaliencySlider better, or take it out.
+--- I agree, will pass these comments forward to Dr. Woodard and Forte
+
+--------------------------------------------------
+
+\textbf{Other misc. comments I left in the overleaf (e.g. broken ExpLogic link, missing DiffLogicVisualizer figure, etc.) Comments that would be good to address, but could probably wait for future (or just toss into future works section) if you don’t have time now:}
+
+When comparing two plots (e.g. Fig. 4-1b inference time between GPU and FPGA), conclusions could be strengthened using statistical test (e.g. Wilcoson signed-rank test or similar) to quantify the difference as well as the statistical significance of the difference
+For MiniNets, it would be good to graph time/size vs. accuracy and quantify the size-accuracy tradeoff using a correlation test
+
+For the scalability issues observed, it would be cool to one day have a metric, tool, or other form of guidance to help people assess when (and when not) to use DiffLogic (and further when/when not to use MiniNets)
+
+For the computational costs observed, it would be interesting future work if there’s a way to get a trained ML model (e.g. Decision Tree, SVM, ANN) and somehow convert/transfer learn to DiffLogic model
+
+Not sure if Woodard will want this now, but in future if you ever submit to an AI venue, it would be good to have 1) mean and standard deviations of performances across multiple runs since (e.g. Table 4.2) since there is training instability due to initialization, 2) table of hyperperameters and tuning details, and other things commonly requested in conference reproducibility checklists (e.g. AAAI)
+
+-----------------------------------------------------
+
+\textbf{Comments that may/may not apply to you, depending on rigors of editorial office:}
+
+List of Abbreviations should be in alphabetical order
+- Addressed this
+
+
+Section headings cannnot immediately follow chapter headings, either delete the section heading of add text in between (e.g. Ch 2 and Sec. 2.1, same with Ch 4 and 5) 
+
+--------------------------------------------------------
+
+\textbf{Nitpicky comments you probably don’t need to address now, 
+but would be good to keep in mind for future papers:
+}
+
+Text in figures should be at least footnote size (esp. if journal/conference is printing your work)
+
+When possible, use vectorized versions of images (e.g. .svg or .pdf) rather than .png or .jpg, so text is searchable and infinitely scaleable so no pixellation upon zoom
+
+If possible, try to make figures color-blind friendly (e.g. hard to see Fig. 4-2) and not seeing an option to switch color scheme in the screenshot of the interface
+
+
+Thanks for all your hard work! lmk if you have any questions!

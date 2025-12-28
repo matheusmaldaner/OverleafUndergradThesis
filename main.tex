@@ -1,0 +1,152 @@
+% \documentclass[editMode]{ufdissertation}\sloppy
+\documentclass{ufdissertation}\sloppy
+
+\usepackage[colorlinks=true]{hyperref}
+
+% User Package and Style File loading.
+
+%\usepackage{CustomMacros}%  This is a user macro/style file.
+
+\usepackage{tikz}%       tikz is used by almost everyone, but certainly by me for this.
+\usepackage{pgfplots}%   pgfplots is tikz but better.
+\usepackage{booktabs} 
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[most]{tcolorbox}
+\usepackage{mdframed}
+%\usepackage{amsrefs}%   amsrefs contains the .bibtex style content for mathematician papers.
+\usepackage{algpseudocode}
+\usepackage[justification=centering]{caption}
+\usepackage{enumitem}
+\floatname{algorithm}{Algorithm}
+\usepackage{scrextend}
+\deffootnote{1.5em}{0em}{\thefootnotemark\quad}
+\usepackage[all]{nowidow} %avoids single lines of text at the top or bottom of page.  If any of your packages cause this package not to work, you will have to manually remove any orphans/widows or add a line penalty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       User Configuration commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Uncomment the relevant line below if you have tables or figures.
+%\haveTablestrue%        Uncomment this if you have tables in your thesis.
+%\haveFigurestrue%       Uncomment this if you have figures in your thesis.
+%\haveObjectstrue%       Uncomment this if you have Objects in your thesis. This is almost certainly not the case however.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Below are the commands to set the degree type, department, graduation time, and chair. 
+%       Most of these are self explanatory. 
+%       Note: The \chair command takes an optional argument for a cochair. 
+%           So if John was your chair and Jacob was a cochair, you would use \chair[Jacob]{John}.
+%           If John was your chair and you had no cochair, you can simply use \chair{John}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Efficient and Transparent Machine Learning: Exploring Applications of Differentiable Logic Gate Networks} 
+
+\degreeType{Bachelor of Science}%   Official name of your degree; eg "Doctor of Philosophy".
+
+\major{Data Science, Department of Statistics}
+\author{Matheus Kunzler Maldaner}
+\thesisType{Undergraduate Thesis}
+\degreeYear{2025}
+\degreeMonth{May}
+\chair[Domenic Forte]{Damon L. Woodard} % Chair and Cochair 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% For each of the following, type in the name of the file that contains each section. 
+% They are assumed to be tex files, but if they aren't the command takes an optional argument for the extension.
+%So, you could load dedication.tex as your dedication file using \setDedicationFile{dedication}
+% You could load dedication.txt instead with \setDedicationFile[txt]{dedication}.
+
+% NOTE: For some compilers they may or may not add a .tex to the end of the file automatically.
+% If you get a "couldn't find dedication.tex.tex" type error, try the command with an empty optional argument,
+%e.g. \setDedicationFile[]{dedication}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% These are REQUIRED sections; easiest to do via these commands.
+
+% Abstract Page (This should only include the abstract itself)
+\setAbstractFile{Chapters/0_Abstract}
+
+% Dedication Page
+\setDedicationFile{Chapters/X_Dedication}
+
+% Acknowledgements Page
+\setAcknowledgementsFile{Chapters/X_Acknowledgements}
+
+% References. 
+% First argument is your bibtex source file
+% Second argument is your bibtex style file.
+\setReferenceFile{references}{plain}
+
+% Biography file of the Author (you).
+\setBiographicalFile{Chapters/X_Biography}
+
+% Abbreviations Page
+\setAbbreviationsFile{Chapters/X_Abbreviations}
+
+% no appendix being used
+%\setAppendixFile{appendix}
+
+\multipleAppendixtrue                       
+
+
+%%%%%%% End of File Assignment %%%%%%
+
+\begin{document}
+
+\include{Chapters/1_Introduction} % Introduction (Background -> Motivation ->  Literature Review -> DiffLogic Architecture 
+\include{Chapters/2_Background} % Background/Motivation -- Literature Review + DiffLogic
+\include{Chapters/3_Methods} % Methods (4 contributions)
+\include{Chapters/4_Results} % Results and Future Work
+\include{Chapters/5_Conclusion} % Conclusion
+
+% custom commands to add red bold commands in the text
+\newcommand{\dmkm}[1]{{\color{red}{\textbf{[Add]:} #1}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STANDARD FORMAT (intro, methods, results, conclusion)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\include{chapter1} % Introduction
+
+%\include{chapter2} % Background 
+%--- Literature Review
+%--- DiffLogic Architecture
+
+%\include{chapter3} % Tasks and Methodology
+%--- Applications and Contributions
+%--- MiniNets 
+%--- FPGA Implementation
+%--- Visualization and Transparency
+
+%\include{chapter4} % Results and Comparisons
+%\include{chapter5} % Conclusion and Future Work
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TOPIC FORMAT (intro+overview, topic1, topic2, topic3, discussion, conclusion)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\include{chapter1} % Introduction
+
+%\include{chapter2} % Background 
+%--- Literature Review
+%--- DiffLogic Architecture
+
+%\include{chapter2} % Topics 
+%--- Applications and Contributions (Methods + results --> transition)  
+%--- MiniNets and FPGA Implementation (Methods + results --> transition)
+%--- Visualization and Transparency (Methods + results --> transition)
+
+%\include{chapter7} % Discussion and Future Work (summarize everything) 
+%\include{chapter8} % Conclusion 
+
+
+
+%\chapter{EXAMPLES OF EDITOR/Author TOOLS}% Notice that we can use chapter/section etc breaks in the master file if we want, and then use \input instead of \include to avoid unneccessary page breaks.
+%\input{editorAndAuthorRemarks}%     Stuff about using editorRemark and authorRemark commands
+
+\end{document}
+
+
+
+
