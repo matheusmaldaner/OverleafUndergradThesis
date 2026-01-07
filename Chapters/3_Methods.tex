@@ -120,7 +120,7 @@ One challenge that arose with DiffLogic (and similarly with many neural or logic
 \Statex
 \Phase{Phase 3: Threshold Pruning}
 \For{each class $i$}
-    \State $T_i \gets sf \times \max(A^{(i)})$ \Comment{Compute threshold}
+    \State $T_i \gets sf \times \max(A^{(i)})$ %\Comment{Compute threshold}
     \State Mark node $j$ as \textit{unused} if $a_j^{(i)} \leq T_i$
 \EndFor
 
@@ -134,7 +134,7 @@ One challenge that arose with DiffLogic (and similarly with many neural or logic
 \Statex
 \Phase{Phase 5: Build and Evaluate}
 \For{each class $i$}
-    \State $M_i \gets$ \Call{BuildMiniNet}{$G_i$} \Comment{One-vs-all classifier}
+    \State $M_i \gets$ \Call{BuildMiniNet}{$G_i$} %\Comment{One-vs-all classifier}
     \State Evaluate accuracy, precision, recall on held-out data
 \EndFor
 
