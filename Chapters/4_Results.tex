@@ -135,29 +135,7 @@ Additionally, MiniNet compression significantly reduces model complexity, achiev
 \section{Results from Developing Visualization Software}
 \label{sec:results_visualization}
 
-Together, the two developed visualization tools, SaliencySlider and DiffLogicVisualizer, illustrate two complementary approaches to explainable AI. SaliencySlider reveals salient pixel-level features in conventional CNNs with general saliency algorithms, and DiffLogicVisualizer illuminates the inner workings of specific DiffLogic Networks. This section outlines the technical development of both approaches.
-
-\subsection{SaliencySlider Development}
-\label{sec:saliencySlider_results}
-
-Preliminary usage of SaliencySlider shows enhancement in the interpretability of large CNNs by offering real-time, interactive exploration which to the author's knowledge is not seen anywhere else. Users can see whether the CNN was focusing on relevant object features (e.g., the soccer ball) or extraneous background elements across several different techniques simultaneously as seen in Figure \ref{fig:saliencyslider}.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=0.7\linewidth]{Figures/saliencyslider.png}}    \caption{Interface of the SaliencySlider web tool demonstrating saliency overlays.}
-    \label{fig:saliencyslider}
-\end{figure}
-
-% \begin{enumerate}[noitemsep,topsep=0pt]
-%     \item \textbf{Image Preprocessing:} Uploaded images are resized and normalized to match the input requirements of VGG19. 
-%     \item \textbf{Saliency Calculation:} A gradient-based XAI algorithm (e.g., Grad-CAM) computes an importance map of each pixel’s contribution to the predicted class.
-%     \item \textbf{Overlay Generation:} The importance map is transformed into a heatmap overlay, which highlights the most critical regions of the input image.
-%     \item \textbf{Interactive Slider:} A user-controlled slider modulates the overlay’s visibility, gradually revealing or obscuring salient regions. This feature allows users to observe how the CNN’s interpretation evolves from minimal saliency to full image context.
-%     \item \textbf{Deployment Architecture:} A Django backend runs the model inference, while a JavaScript/React-based frontend handles dynamic rendering of saliency overlays. For flexible hosting, SaliencySlider can be containerized via Docker and deployed on platforms such as Amazon Lightsail Container.
-% \end{enumerate}
-
-Although the tool facilitates understanding of saliency-based features, it is important to reiterate that post hoc XAI explanations do not guarantee faithful insights into deep neural network models. Saliency maps depict correlations rather than causal logic, and they can be influenced by adversarial noise or spurious data patterns \cite{adebayo2022posthocexplanationsineffective, explogic}. Nevertheless, SaliencySlider addresses a recognized gap in existing XAI tools by providing a single modular interface where users can compare an array of different saliency methods side-by-side, making it easy to incorporate new algorithms as they are developed.
-
+This section presents the results from developing DiffLogicVisualizer, a visualization tool designed to shed light into the inner workings of DiffLogic networks and enhance model interpretability.
 
 \subsection{DiffLogicVisualizer Development}
 

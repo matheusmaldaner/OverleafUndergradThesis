@@ -1,7 +1,7 @@
 \chapter{Methods}
 \label{chap:methods}
 
-This thesis has three main objectives: to explore hardware implementations by extracting the learned gates from a trained DiffLogic model and mapping them onto FPGAs (Section \ref{sec:fpga}), to develop a reduction algorithm that creates MiniNets while retaining the original model’s accuracy (Section \ref{sec:mininets}), and to introduce two visualization tools for enhancing transparency in DiffLogic and other XAI methods (Section \ref{sec:visualizationSoftware}). 
+This thesis has three main objectives: to explore hardware implementations by extracting the learned gates from a trained DiffLogic model and mapping them onto FPGAs (Section \ref{sec:fpga}), to develop a reduction algorithm that creates MiniNets while retaining the original model's accuracy (Section \ref{sec:mininets}), and to introduce a visualization tool for enhancing transparency in DiffLogic models (Section \ref{sec:visualizationSoftware}). 
 
 % Prior work has translated neural nets into logical circuits for verifiability and interpretability in critical applications, yet Petersen’s experiments did not attempt to extract human-understandable rules from the learned networks or visualize the logic being used, which sets the stage for this thesis and for the experiments and developments conducted as follows.
 
@@ -188,76 +188,15 @@ One challenge that arose with DiffLogic (and similarly with many neural or logic
 
 A key consideration with MiniNets is that they rely on a one-vs.-all classification approach, generating a distinct reduced model for each class, which can become computationally expensive for tasks involving a large number of classes. Due to the pruning nature of the algorithm, there is a natural trade-off between speed and accuracy as raising the node-removal threshold, also referred to as the Switching Frequency (``sf'') since it counts how frequently a node switches on, shrinks network size and shortens inference times, but risks discarding gates essential for correct classification, leading to performance degradation. Consequently, practitioners must strike a balance between efficiency gains and acceptable accuracy requirements.
 
-While MiniNets provide a more compact and interpretable representation of DiffLogic networks, users still need clear interfaces to understand how these logic-based models process inputs. To address this, the next section introduces two visualization tools, SaliencySlider and DiffLogicVisualizer, that are designed to give both researchers and non-experts a clearer view of the internal behavior and decision processes of AI models.
+While MiniNets provide a more compact and interpretable representation of DiffLogic networks, users still need clear interfaces to understand how these logic-based models process inputs. To address this, the next section introduces DiffLogicVisualizer, a visualization tool designed to give both researchers and non-experts a clearer view of the internal behavior and decision processes of DiffLogic models.
 
 \section{Developing Visualization Software}
 \label{sec:visualizationSoftware}
 
-Even with XAI and NSAI methods, it can be complicated for the average user to understand how they work due to their complexity and lack of user-friendly visualizations. This section details the development of two visualization tools: SaliencySlider and DiffLogicVisualizer.
-
-\subsection{SaliencySlider Software}
-
-Post hoc explanation strategies dominate modern XAI research for standard convolutional neural networks (CNNs), yet many such methods offer limited transparency because they are applied after the model has been fully trained. In other words, the black-box nature of CNNs remains largely intact, and saliency-based overlays - while helpful - do not necessarily reflect the true causal logic behind predictions. 
-
-To address the usability gap and provide a more interactive experience, \textit{SaliencySlider} was developed as a web-based tool that enables users to upload images, apply various saliency algorithms (e.g., Grad-CAM), and dynamically explore which regions in an image are deemed most influential by a pretrained CNN (VGG19) as detailed in Algorithm \ref{alg:saliencyslider_workflow}. The code and documentation for SaliencySlider are publicly accessible\footnote{Source code can be found at \url{https://github.com/matheusmaldaner/SaliencySlider}} and have been archived and made citable via Zenodo~\cite{maldaner2025saliencyslider}.
-
-\begin{algorithm}[!htbp]  
-\footnotesize
-\caption{SaliencySlider Visualization Workflow}
-\label{alg:saliencyslider_workflow}
-% \begin{mdframed}[linewidth=0.3pt, roundcorner=2pt, innertopmargin=4pt, innerbottommargin=4pt, innerleftmargin=6pt, innerrightmargin=6pt]
-
-\begin{algorithmic}[1]
-\Require 
-  \textit{UserImage:} Image uploaded by the user \\
-  \textit{CNNModel:} Pretrained model (e.g., VGG19) \\
-  \textit{XAIAlgorithm:} Gradient-based saliency method (e.g., Grad-CAM)
-\Ensure 
-  \textit{InteractiveHeatmap}: A dynamic saliency overlay on the image
-
-\Statex
-
-\State \textbf{Step 1: Image Preprocessing}
-\State Resize and normalize \textit{UserImage} to match the input requirements of \textit{CNNModel}.
-
-\Statex
-
-\State \textbf{Step 2: Saliency Calculation}
-\State Apply \textit{XAIAlgorithm} to compute a pixel-wise importance map for the predicted class.
-
-\Statex
-
-\State \textbf{Step 3: Overlay Generation}
-\State Convert the importance map into a heatmap overlay that highlights critical regions of the image.
-
-\Statex
-
-\State \textbf{Step 4: Interactive Slider Integration}
-\State Integrate a user-controlled slider to modulate the overlay's opacity, allowing dynamic visualization of saliency.
-
-\Statex
-
-\State \textbf{Step 5: Deployment Architecture}
-\State Utilize a Django backend for model inference and a JavaScript/React frontend for real-time rendering.
-\State Containerize the application with Docker for flexible cloud deployment.
-
-\Statex
-
-\State \Return \textit{InteractiveHeatmap} for user exploration of model saliency.
-\end{algorithmic}
-% \end{mdframed}
-\end{algorithm}
-
-
-
-As noted in Section \ref{sec:sec_xai}, post hoc saliency maps do not fully resolve the interpretability challenges posed by black-box CNNs. Although Grad-CAM and similar methods can reveal which pixels strongly influence a model’s output, they may produce misleading explanations or fail to capture the true causal factors driving network decisions. While, SaliencySlider provides a more accessible interface for exploring model inferences, the underlying models remain inherently non-symbolic, limiting definitive insights into its decision logic and shedding light into the need for intrinsically interpretable architectures or hybrid neurosymbolic solutions as seen below.
-
-
+Even with intrinsically interpretable architectures like DiffLogic, it can be complicated for the average user to understand how they work due to their complexity and lack of user-friendly visualizations. While numerous tools exist for traditional deep learning interpretability, none adequately address the unique logical structure found in DiffLogic models. To fill this gap, \textit{DiffLogicVisualizer} was developed as a specialized platform that parses and visually renders the architecture learned by DiffLogic.
 
 \subsection{DiffLogicVisualizer Software}
-\label{sec:diffLogicVisualizer}
-
-While numerous tools exist for traditional deep learning interpretability, none adequately address the unique logical structure found in DiffLogic models. To fill this gap, \textit{DiffLogicVisualizer} is introduced as a specialized platform that parses and visually renders the architecture learned by DiffLogic. 
+\label{sec:diffLogicVisualizer} 
 
 Commonly used visualization methods for neural networks (e.g., saliency maps) focus on subsymbolic layers and do not translate effectively to gate-based logic networks. \textit{DiffLogicVisualizer} addresses this by dynamically loading DiffLogic networks and illustrating them as directed acyclic graphs (DAG) in which each node represents a discretized logic gate (e.g., \texttt{AND}, \texttt{OR}, \texttt{XOR}), and edges denote signals passing between gates as detailed in Algorithm \ref{alg:difflogicvisualizer}. The code and documentation for DiffLogicVisualizer are publicly accessible\footnote{Source code can be found at \url{https://github.com/matheusmaldaner/DiffLogicVisualizer}} and have been archived via Zenodo~\cite{maldaner2025difflogicvisualizer}.
 
