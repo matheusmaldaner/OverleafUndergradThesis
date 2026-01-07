@@ -37,70 +37,51 @@ While you can implement regular neural networks into hardware directly, one of t
 The overall workflow begins with training the DiffLogic model and discretizing it into a gate-level representation, which is then mapped to the Intel DE10-Lite FPGA. This pipeline, described in detail in Algorithm \ref{alg:fpga_generation}, can be used with trained DiffLogic models of varying sizes as well as any FPGA. The complete implementation is publicly available\footnote{Source code for the FPGA implementation is available at \url{https://github.com/matheusmaldaner/EcoLogic}} and has been archived and made citable via Zenodo~\cite{maldaner2025ecologic}.
 
 \begin{algorithm}[!htbp]
-\footnotesize
 \caption{Hardware Synthesis Pipeline for DiffLogic Models}
 \label{alg:fpga_generation}
-% \begin{mdframed}[linewidth=0.5pt, roundcorner=4pt]
-
+\begin{algorithmbox}
 \begin{algorithmic}[1]
 
-\Require
-  \textit{TrainedModel}: A DiffLogic model with discrete (Boolean) gates \\
-  \textit{DE10-Lite} board or similar FPGA target \\
-  \textit{QuartusPrime}: Intel FPGA development software \\
-  \textit{Optionally:} ModelSim or equivalent simulator
-\Ensure
-  \textit{Bitstream}: A programmed FPGA implementing the learned DiffLogic circuit
+\Require \textit{TrainedModel}: DiffLogic model with discrete Boolean gates
+\Require \textit{FPGA}: DE10-Lite board (or similar target)
+\Require \textit{Quartus Prime}: Intel FPGA development software
+\Ensure \textit{Bitstream}: Programmed FPGA implementing the DiffLogic circuit
 
 \Statex
-
-\State \textbf{Step 1: Preparation}
-\State Train the DiffLogic model in floating-point on CPU/GPU until convergence.
-\State Apply discretization so that each neuron is expressed as a Boolean gate (e.g., AND, OR, NOT).
-
-\Statex
-
-\State \textbf{Step 2: Gate Extraction}
-\State A Python script parses the discretized model and identifies:
-\begin{enumerate}[noitemsep,topsep=0pt]
-    \item The specific logic operation for each neuron (e.g., AND, XOR).
-    \item The neuron-to-neuron (or input-to-neuron) connections, including any negations or constant inputs.
-\end{enumerate}
-\State The result is a netlist-like structure representing each gate and its input wires.
+\Phase{Phase 1: Model Preparation}
+\State Train DiffLogic model until convergence
+\State Discretize neurons $\rightarrow$ Boolean gates (AND, OR, XOR, NOT)
 
 \Statex
-
-\State \textbf{Step 3: HDL Generation}
-\State Convert the netlist into Verilog or VHDL, where each gate is mapped to an \texttt{assign} statement (Verilog) or signal assignment (VHDL).
-\State For each layer in the DiffLogic model, declare wires or signals to represent intermediate outputs.  
-\State If negations are used, insert \texttt{NOT} gates or bitwise negation operators.
+\Phase{Phase 2: Gate Extraction}
+\State Parse model to extract gate operations and connections
+\State Build netlist structure: $\mathcal{G} = (V, E)$ where $V$ = gates, $E$ = wires
 
 \Statex
-
-\State \textbf{Step 4: Synthesis and Place-and-Route}
-\State In Quartus Prime, create a new project targeting the DE10-Lite board or other FPGA device.
-\State Import the generated HDL file(s).
-\State Assign input pins (e.g., DIP switches, GPIO) and output pins (LEDs or connectors) to the module ports.
-\State Invoke the synthesis engine and place-and-route flow:
-\begin{enumerate}[noitemsep,topsep=0pt]
-    \item Set a timing constraint (e.g., 50\,MHz) to ensure logic propagation completes within one clock cycle.
-    \item Verify that the circuit fits within available LUTs and meets timing closure.
-\end{enumerate}
+\Phase{Phase 3: HDL Generation}
+\For{each layer $\ell$ in model}
+    \State Declare intermediate wires/signals
+    \For{each gate $g$ in layer $\ell$}
+        \State Map $g$ to HDL assignment (Verilog \texttt{assign} or VHDL signal)
+    \EndFor
+\EndFor
+\State Insert NOT gates for negated inputs
 
 \Statex
-
-\State \textbf{Step 5: Verification and Deployment}
-\State If desired, perform functional simulation in ModelSim, providing synthetic inputs and checking intermediate signals for correctness.
-\State Once validated, generate a bitstream and program it onto the FPGA via the USB Blaster or similar interface.
-\State Supply real or emulated inputs (e.g., on-board RAM or DIP switches) to the FPGA, and observe outputs on LEDs or capture them digitally.
+\Phase{Phase 4: Synthesis}
+\State Create Quartus project for target FPGA
+\State Import HDL files and assign I/O pins
+\State Run synthesis with timing constraint (e.g., 50\,MHz)
+\State Verify LUT utilization and timing closure
 
 \Statex
-
-\State \textbf{Output: Hardware-Ready DiffLogic Network}
-\State The final FPGA bitstream implements the learned DiffLogic circuit. Each inference is computed by direct signal propagation through combinational gates, typically at low power and high speed compared to GPU-based execution.
+\Phase{Phase 5: Deployment}
+\State \textbf{Optional:} Simulate in ModelSim for functional verification
+\State Generate bitstream and program FPGA via USB Blaster
+\State \Return Hardware-accelerated DiffLogic inference circuit
 
 \end{algorithmic}
-% \end{mdframed}
+\end{algorithmbox}
 \end{algorithm}
 
 While DiffLogic models already perform inference at orders of magnitude faster than regular feed-forward ANNs \cite{difflogic}, with computational complexity of $\boldsymbol{O(1)}$ for DiffLogic versus $\boldsymbol{O(L \times N)}$ for traditional feed-forward networks (where $L$ is the number of layers and $N$ the average number of nodes per layer), leveraging FPGAs allows DiffLogic models to achieve real-time inference with minimal latency and power, making them particularly suitable for embedded or edge applications. The next section introduces MiniNets as a \textit{post hoc} algorithm to further reduce the number of logic gates in trained DiffLogic models. This reduction preserves accuracy and enhances both interpretability and hardware resource utilization.
@@ -113,76 +94,54 @@ While DiffLogic models already perform inference at orders of magnitude faster t
 
 One challenge that arose with DiffLogic (and similarly with many neural or logical models) is that the learned networks can be quite large or complex, even if many parts of the network are not essential for the final decision. For interpretability and efficiency, it is desirable to simplify the model as much as possible without sacrificing accuracy, which in digital logic terms, is akin to minimizing a Boolean circuit. The author introduces the concept of MiniNets\footnote{While the MiniNet algorithm is a novel contribution by the author, the author has introduced it as part of a previous work with Wormald et al., under the eXpLogic algorithm suite designed to interpret and reduce DiffLogic networks~\cite{explogic}.}, Miniature DiffLogic Networks that retain the predictive performance of the original model while using significantly fewer gates. The reduction process is described in Algorithm~\ref{alg:mininet_pipeline_condensed}, and its code implementation has been made publicly available\footnote{Source code for MiniNet generation is available at \url{https://github.com/matheusmaldaner/ExpLogic}} and archived for citation via Zenodo~\cite{maldaner2025explogic}.
 
-\begin{algorithm}[!htbp]  
-\footnotesize                
+\begin{algorithm}[!htbp]
 \caption{MiniNet Creation Pipeline for $N$ Classes}
 \label{alg:mininet_pipeline_condensed}
-
-% \begin{mdframed}[linewidth=0.5pt, roundcorner=4pt]
+\begin{algorithmbox}
 \begin{algorithmic}[1]
-\Require 
-  \textit{BaseModel:} Trained DiffLogic model \\
-  \textit{Dataset:} Labeled data with $N$ classes \\
-  \textit{SwitchingFrequency} $(sf)$: Threshold for node activation \\
-  \textit{BatchSize} $(bs)$: Batch size for loading data \\
-  \textit{Device:} Compute device (e.g., \texttt{cpu}, \texttt{cuda})
-\Ensure 
-  \textit{MiniNets}: A set of $N$ reduced models, one for each class
+
+\Require \textit{BaseModel}: Trained DiffLogic model
+\Require \textit{Dataset}: Labeled data with $N$ classes
+\Require \textit{sf}: Switching frequency threshold $\in [0, 1]$
+\Ensure \textit{MiniNets}: Set of $N$ reduced models $\{M_1, \ldots, M_N\}$
 
 \Statex
-
-\State \textbf{Step 1: Class-Specific Data Loaders}
-\State Partition the training/test data by class, creating $N$ data loaders $\{D_1, \ldots, D_N\}$.
+\Phase{Phase 1: Partition Data}
+\State Split dataset into class-specific loaders $\{D_1, \ldots, D_N\}$
 
 \Statex
-
-\State \textbf{Step 2: Collect Node Activations}
-\For{each class $i$}
-  \State Temporarily register hooks in \textit{BaseModel} to record how often each node’s output $> 0$.
-  \State Run a forward pass on all samples in $D_i$, summing these activations.
-  \State Remove the hooks afterward.
+\Phase{Phase 2: Collect Activations}
+\For{each class $i \in \{1, \ldots, N\}$}
+    \State Register hooks to count node activations $a_j^{(i)}$ for each node $j$
+    \State Forward pass all samples in $D_i$
+    \State $A^{(i)} \gets$ activation counts per node
 \EndFor
 
 \Statex
-
-\State \textbf{Step 3: Thresholding Unused Nodes}
+\Phase{Phase 3: Threshold Pruning}
 \For{each class $i$}
-  \State Find the max activation in each layer, define threshold $T_i = sf \times \text{(max activation)}$.
-  \State Mark nodes whose count $\leq T_i$ as ``unused'' for class $i$.
+    \State $T_i \gets sf \times \max(A^{(i)})$ \Comment{Compute threshold}
+    \State Mark node $j$ as \textit{unused} if $a_j^{(i)} \leq T_i$
 \EndFor
 
 \Statex
-
-\State \textbf{Step 4: Extract and Filter Connections}
-\State From \textit{BaseModel}, retrieve the learned logic gates and input-output connections.
+\Phase{Phase 4: Extract Active Subgraph}
 \For{each class $i$}
-  \State In reverse layer order, \textit{propagate activity} so no needed gate is wrongly discarded.
-  \State Filter out gates marked ``unused'' and keep only the connections that remain active.
+    \State Propagate activity in reverse layer order
+    \State $G_i \gets$ subgraph of active gates and connections
 \EndFor
 
 \Statex
-
-\State \textbf{Step 5: Build MiniNets}
+\Phase{Phase 5: Build and Evaluate}
 \For{each class $i$}
-  \State Combine remaining gates and inputs into a new, reduced \textit{DiffLogic} model.
-  \State Save as \(\text{MiniNet}[i]\).
+    \State $M_i \gets$ \Call{BuildMiniNet}{$G_i$} \Comment{One-vs-all classifier}
+    \State Evaluate accuracy, precision, recall on held-out data
 \EndFor
 
-\Statex
-
-\State \textbf{Step 6: Evaluate Each MiniNet}
-\For{each class $i$}
-  \State Interpreted as “class $i$ vs.\ not class $i$.”
-  \State Optionally optimize a threshold using precision-recall curves.
-  \State Compute and report accuracy, precision, recall, etc.
-\EndFor
-
-\Statex
-
-\State \Return \(\{\text{MiniNet}[1], \dots, \text{MiniNet}[N]\}\) and evaluation metrics
+\State \Return $\{M_1, \ldots, M_N\}$ with evaluation metrics
 
 \end{algorithmic}
-% \end{mdframed}
+\end{algorithmbox}
 \end{algorithm}
 
 
@@ -200,58 +159,49 @@ Even with intrinsically interpretable architectures like DiffLogic, it can be co
 
 Commonly used visualization methods for neural networks (e.g., saliency maps) focus on subsymbolic layers and do not translate effectively to gate-based logic networks. \textit{DiffLogicVisualizer} addresses this by dynamically loading DiffLogic networks and illustrating them as directed acyclic graphs (DAG) in which each node represents a discretized logic gate (e.g., \texttt{AND}, \texttt{OR}, \texttt{XOR}), and edges denote signals passing between gates as detailed in Algorithm \ref{alg:difflogicvisualizer}. The code and documentation for DiffLogicVisualizer are publicly accessible\footnote{Source code can be found at \url{https://github.com/matheusmaldaner/DiffLogicVisualizer}} and have been archived via Zenodo~\cite{maldaner2025difflogicvisualizer}.
 
-A lightweight backend extracts the gate-level configuration from a trained DiffLogic model (commonly stored as a \texttt{.pth} file) and generates a structured graph representation in JSON. This graph is then rendered in a web-based frontend using a combination of modern JavaScript frameworks and D3.js for dynamic, interactive visualization. Users can zoom, pan, and filter various sections of the DAG, allowing granular exploration of how specific gates and their connections contribute to the final prediction. A technical workflow of the tool is described as follows:
+A lightweight backend extracts the gate-level configuration from a trained DiffLogic model (commonly stored as a \texttt{.pth} file) and generates a structured graph representation in JSON. This graph is then rendered in a web-based frontend using ReactFlow, a React library for building interactive node-based graphs. Users can zoom, pan, and explore various sections of the DAG, allowing granular exploration of how specific gates and their connections contribute to the final prediction. A technical workflow of the tool is described as follows:
 
-\begin{algorithm}[!htbp]  
-\footnotesize
+\begin{algorithm}[!htbp]
 \caption{DiffLogicVisualizer Workflow}
 \label{alg:difflogicvisualizer}
-% \begin{mdframed}[linewidth=0.3pt, roundcorner=2pt, innertopmargin=4pt, innerbottommargin=4pt, innerleftmargin=6pt, innerrightmargin=6pt]
-
+\begin{algorithmbox}
 \begin{algorithmic}[1]
-\Require 
-  \textit{DiffLogicModel:} A trained DiffLogic model \\
-  \textit{VisualizationEngine:} Framework for rendering directed acyclic graphs (DAGs) \\
-  \textit{UserInterface:} Web interface (e.g., built with React)
-\Ensure 
-  \textit{InteractiveGraph}: A visual representation of the DiffLogic network as a DAG
+
+\Require \textit{Model}: Trained DiffLogic model (\texttt{.pth} file)
+\Require \textit{Image}: Input image for inference
+\Ensure \textit{InteractiveGraph}: DAG visualization of network structure
 
 \Statex
-
-\State \textbf{Step 1: Model Parsing}
-\State Extract the network architecture from \textit{DiffLogicModel}, including:
-\begin{enumerate}[noitemsep,topsep=0pt]
-    \item Node definitions (each discretized logic gate with its type and probability).
-    \item Edge definitions (input-output connections between gates).
-\end{enumerate}
+\Phase{Phase 1: Model Parsing}
+\State Load model weights and architecture
+\State Extract nodes $V = \{v_i : \text{gate type, probability}\}$
+\State Extract edges $E = \{(v_i, v_j) : \text{signal connections}\}$
 
 \Statex
-
-\State \textbf{Step 2: Graph Construction}
-\State Convert the extracted architecture into a directed acyclic graph (DAG), where nodes represent logic gates and edges denote signal flow.
-
-\Statex
-
-\State \textbf{Step 3: Data Formatting}
-\State Format the DAG into a structured data format (e.g., JSON) compatible with the \textit{VisualizationEngine}.
+\Phase{Phase 2: Graph Construction}
+\State Build DAG $\mathcal{G} = (V, E)$ from extracted components
+\State Assign layer positions for hierarchical layout
 
 \Statex
-
-\State \textbf{Step 4: Rendering the Graph}
-\State Use the \textit{VisualizationEngine} to render the DAG on the \textit{UserInterface}, supporting interactive features such as zooming and panning.
-
-\Statex
-
-\State \textbf{Step 5: User Interaction}
-\State Enable node-specific interactions, allowing users to click on nodes for additional details (e.g., gate type, input connections).
-\State Provide controls for filtering or highlighting parts of the network.
+\Phase{Phase 3: JSON Serialization}
+\State Format $\mathcal{G}$ as JSON for frontend consumption
+\State Include gate metadata (type, activation probability)
 
 \Statex
+\Phase{Phase 4: Visualization Rendering}
+\State Render DAG using ReactFlow graph library
+\State Enable zoom, pan, and node selection interactions
 
-\State \Return \textit{InteractiveGraph} for dynamic exploration of the DiffLogic network.
+\Statex
+\Phase{Phase 5: Interactive Exploration}
+\State Highlight activated gates based on input image
+\State Display node details on click (gate type, connections)
+
+\State \Return Interactive DAG visualization
+
 \end{algorithmic}
-% \end{mdframed}
+\end{algorithmbox}
 \end{algorithm}
 
 
-The user uploads an image, which is first binarized (converted to black and white) and passed through the model. The tool highlights activated gates based on input patterns, revealing the logic behind predictions and enabling intuitive debugging or explanations. Visualizing gate-level activity clarifies the logical operations behind classification decisions, beyond simply highlighting pixel importance as done by competing post-hoc tools.
+The user uploads an image, which is converted to grayscale and passed through the model. The tool highlights activated gates based on input patterns, revealing the logic behind predictions and enabling intuitive debugging or explanations. Visualizing gate-level activity clarifies the logical operations behind classification decisions, beyond simply highlighting pixel importance as done by competing post-hoc tools.
