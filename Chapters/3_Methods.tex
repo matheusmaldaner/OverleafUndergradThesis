@@ -36,50 +36,32 @@ While you can implement regular neural networks into hardware directly, one of t
 
 The overall workflow begins with training the DiffLogic model and discretizing it into a gate-level representation, which is then mapped to the Intel DE10-Lite FPGA. This pipeline, described in detail in Algorithm \ref{alg:fpga_generation}, can be used with trained DiffLogic models of varying sizes as well as any FPGA. The complete implementation is publicly available\footnote{Source code for the FPGA implementation is available at \url{https://github.com/matheusmaldaner/EcoLogic}} and has been archived and made citable via Zenodo~\cite{maldaner2025ecologic}.
 
-\begin{algorithm}[!htbp]
+\begin{algorithm}[H]
 \caption{Hardware Synthesis Pipeline for DiffLogic Models}
 \label{alg:fpga_generation}
 \begin{algorithmbox}
 \begin{algorithmic}[1]
-
 \Require \textit{TrainedModel}: DiffLogic model with discrete Boolean gates
-\Require \textit{FPGA}: DE10-Lite board (or similar target)
-\Require \textit{Quartus Prime}: Intel FPGA development software
+\Require \textit{FPGA}: DE10-Lite board; \textit{Quartus Prime}: Intel FPGA software
 \Ensure \textit{Bitstream}: Programmed FPGA implementing the DiffLogic circuit
-
-\Statex
 \Phase{Phase 1: Model Preparation}
 \State Train DiffLogic model until convergence
 \State Discretize neurons $\rightarrow$ Boolean gates (AND, OR, XOR, NOT)
-
-\Statex
 \Phase{Phase 2: Gate Extraction}
 \State Parse model to extract gate operations and connections
-\State Build netlist structure: $\mathcal{G} = (V, E)$ where $V$ = gates, $E$ = wires
-
-\Statex
+\State Build netlist: $\mathcal{G} = (V, E)$ where $V$ = gates, $E$ = wires
 \Phase{Phase 3: HDL Generation}
 \For{each layer $\ell$ in model}
-    \State Declare intermediate wires/signals
     \For{each gate $g$ in layer $\ell$}
-        \State Map $g$ to HDL assignment (Verilog \texttt{assign} or VHDL signal)
+        \State Map $g$ to HDL (Verilog \texttt{assign} or VHDL signal)
     \EndFor
 \EndFor
-\State Insert NOT gates for negated inputs
-
-\Statex
 \Phase{Phase 4: Synthesis}
-\State Create Quartus project for target FPGA
-\State Import HDL files and assign I/O pins
-\State Run synthesis with timing constraint (e.g., 50\,MHz)
-\State Verify LUT utilization and timing closure
-
-\Statex
+\State Create Quartus project, import HDL, assign I/O pins
+\State Run synthesis (50\,MHz constraint), verify LUT utilization
 \Phase{Phase 5: Deployment}
-\State \textbf{Optional:} Simulate in ModelSim for functional verification
 \State Generate bitstream and program FPGA via USB Blaster
 \State \Return Hardware-accelerated DiffLogic inference circuit
-
 \end{algorithmic}
 \end{algorithmbox}
 \end{algorithm}
@@ -94,52 +76,37 @@ While DiffLogic models already perform inference at orders of magnitude faster t
 
 One challenge that arose with DiffLogic (and similarly with many neural or logical models) is that the learned networks can be quite large or complex, even if many parts of the network are not essential for the final decision. For interpretability and efficiency, it is desirable to simplify the model as much as possible without sacrificing accuracy, which in digital logic terms, is akin to minimizing a Boolean circuit. The author introduces the concept of MiniNets\footnote{While the MiniNet algorithm is a novel contribution by the author, the author has introduced it as part of a previous work with Wormald et al., under the eXpLogic algorithm suite designed to interpret and reduce DiffLogic networks~\cite{explogic}.}, Miniature DiffLogic Networks that retain the predictive performance of the original model while using significantly fewer gates. The reduction process is described in Algorithm~\ref{alg:mininet_pipeline_condensed}, and its code implementation has been made publicly available\footnote{Source code for MiniNet generation is available at \url{https://github.com/matheusmaldaner/ExpLogic}} and archived for citation via Zenodo~\cite{maldaner2025explogic}.
 
-\begin{algorithm}[!htbp]
+\begin{algorithm}[H]
 \caption{MiniNet Creation Pipeline for $N$ Classes}
 \label{alg:mininet_pipeline_condensed}
 \begin{algorithmbox}
 \begin{algorithmic}[1]
-
 \Require \textit{BaseModel}: Trained DiffLogic model
-\Require \textit{Dataset}: Labeled data with $N$ classes
-\Require \textit{sf}: Switching frequency threshold $\in [0, 1]$
+\Require \textit{Dataset}: Labeled data with $N$ classes; \textit{sf}: switching frequency $\in [0, 1]$
 \Ensure \textit{MiniNets}: Set of $N$ reduced models $\{M_1, \ldots, M_N\}$
-
-\Statex
 \Phase{Phase 1: Partition Data}
 \State Split dataset into class-specific loaders $\{D_1, \ldots, D_N\}$
-
-\Statex
 \Phase{Phase 2: Collect Activations}
 \For{each class $i \in \{1, \ldots, N\}$}
-    \State Register hooks to count node activations $a_j^{(i)}$ for each node $j$
-    \State Forward pass all samples in $D_i$
-    \State $A^{(i)} \gets$ activation counts per node
+    \State Register hooks to count node activations $a_j^{(i)}$
+    \State Forward pass samples in $D_i$; $A^{(i)} \gets$ activation counts
 \EndFor
-
-\Statex
 \Phase{Phase 3: Threshold Pruning}
 \For{each class $i$}
     \State $T_i \gets sf \times \max(A^{(i)})$ %\Comment{Compute threshold}
     \State Mark node $j$ as \textit{unused} if $a_j^{(i)} \leq T_i$
 \EndFor
-
-\Statex
 \Phase{Phase 4: Extract Active Subgraph}
 \For{each class $i$}
     \State Propagate activity in reverse layer order
     \State $G_i \gets$ subgraph of active gates and connections
 \EndFor
-
-\Statex
 \Phase{Phase 5: Build and Evaluate}
 \For{each class $i$}
     \State $M_i \gets$ \Call{BuildMiniNet}{$G_i$} %\Comment{One-vs-all classifier}
     \State Evaluate accuracy, precision, recall on held-out data
 \EndFor
-
 \State \Return $\{M_1, \ldots, M_N\}$ with evaluation metrics
-
 \end{algorithmic}
 \end{algorithmbox}
 \end{algorithm}
@@ -161,44 +128,26 @@ Commonly used visualization methods for neural networks (e.g., saliency maps) fo
 
 A lightweight backend extracts the gate-level configuration from a trained DiffLogic model (commonly stored as a \texttt{.pth} file) and generates a structured graph representation in JSON. This graph is then rendered in a web-based frontend using ReactFlow, a React library for building interactive node-based graphs. Users can zoom, pan, and explore various sections of the DAG, allowing granular exploration of how specific gates and their connections contribute to the final prediction. A technical workflow of the tool is described as follows:
 
-\begin{algorithm}[!htbp]
+\begin{algorithm}[H]
 \caption{DiffLogicVisualizer Workflow}
 \label{alg:difflogicvisualizer}
 \begin{algorithmbox}
 \begin{algorithmic}[1]
-
 \Require \textit{Model}: Trained DiffLogic model (\texttt{.pth} file)
 \Require \textit{Image}: Input image for inference
 \Ensure \textit{InteractiveGraph}: DAG visualization of network structure
-
-\Statex
 \Phase{Phase 1: Model Parsing}
-\State Load model weights and architecture
-\State Extract nodes $V = \{v_i : \text{gate type, probability}\}$
-\State Extract edges $E = \{(v_i, v_j) : \text{signal connections}\}$
-
-\Statex
+\State Load model weights; extract nodes $V$ (gate type, probability)
+\State Extract edges $E = \{(v_i, v_j)\}$ representing signal connections
 \Phase{Phase 2: Graph Construction}
-\State Build DAG $\mathcal{G} = (V, E)$ from extracted components
-\State Assign layer positions for hierarchical layout
-
-\Statex
+\State Build DAG $\mathcal{G} = (V, E)$; assign layer positions for layout
 \Phase{Phase 3: JSON Serialization}
-\State Format $\mathcal{G}$ as JSON for frontend consumption
-\State Include gate metadata (type, activation probability)
-
-\Statex
+\State Format $\mathcal{G}$ as JSON with gate metadata for frontend
 \Phase{Phase 4: Visualization Rendering}
-\State Render DAG using ReactFlow graph library
-\State Enable zoom, pan, and node selection interactions
-
-\Statex
+\State Render DAG using ReactFlow; enable zoom/pan interactions
 \Phase{Phase 5: Interactive Exploration}
-\State Highlight activated gates based on input image
-\State Display node details on click (gate type, connections)
-
+\State Highlight activated gates based on input; show details on click
 \State \Return Interactive DAG visualization
-
 \end{algorithmic}
 \end{algorithmbox}
 \end{algorithm}
