@@ -1,0 +1,126 @@
+% arxiv-override.sty
+% Override UF dissertation formatting with arXiv-style preprint formatting
+% Usage: Include this AFTER loading ufdissertation class when arxiv mode is enabled
+%
+% This creates a cleaner, more compact format suitable for arXiv preprints
+% while maintaining the same content structure.
+
+\ProvidesPackage{arxiv-override}[2025/01/06 arXiv-style overrides for UF dissertation]
+
+%% ============================================================
+%% FONT SIZE: Switch from 12pt to 10pt equivalent
+%% ============================================================
+\renewcommand{\normalsize}{\fontsize{10}{11}\selectfont}
+\renewcommand{\small}{\fontsize{9}{10}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{8}{9}\selectfont}
+\renewcommand{\large}{\fontsize{12}{14}\selectfont}
+\renewcommand{\Large}{\fontsize{14}{16}\selectfont}
+\renewcommand{\LARGE}{\fontsize{17}{20}\selectfont}
+\renewcommand{\huge}{\fontsize{20}{23}\selectfont}
+\renewcommand{\Huge}{\fontsize{25}{28}\selectfont}
+
+%% ============================================================
+%% LINE SPACING: Single spacing instead of double
+%% ============================================================
+\RequirePackage{setspace}
+\singlespacing
+
+%% ============================================================
+%% PARAGRAPH STYLE: No indent, space between paragraphs
+%% ============================================================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.5pt plus 1pt minus 1pt}
+
+%% ============================================================
+%% MARGINS: Slightly tighter for preprint feel
+%% ============================================================
+\RequirePackage{geometry}
+\geometry{
+    top=1in,
+    bottom=1in,
+    left=1in,
+    right=1in,
+    textheight=9in,
+    textwidth=6.5in
+}
+
+%% ============================================================
+%% SECTION FORMATTING: Cleaner, more modern
+%% ============================================================
+\RequirePackage{titlesec}
+
+% Chapter formatting - less dominant
+\titleformat{\chapter}[display]
+    {\normalfont\LARGE\bfseries}
+    {\chaptertitlename\ \thechapter}
+    {10pt}
+    {\LARGE}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% Section formatting
+\titleformat{\section}
+    {\normalfont\large\bfseries\raggedright}
+    {\thesection}
+    {1em}
+    {}
+\titlespacing*{\section}{0pt}{2.0ex plus 0.5ex minus 0.2ex}{1.0ex plus 0.2ex}
+
+% Subsection formatting
+\titleformat{\subsection}
+    {\normalfont\normalsize\bfseries\raggedright}
+    {\thesubsection}
+    {1em}
+    {}
+\titlespacing*{\subsection}{0pt}{1.5ex plus 0.3ex minus 0.2ex}{0.5ex plus 0.1ex}
+
+% Subsubsection formatting
+\titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries\raggedright}
+    {\thesubsubsection}
+    {1em}
+    {}
+\titlespacing*{\subsubsection}{0pt}{1.2ex plus 0.2ex minus 0.1ex}{0.3ex plus 0.1ex}
+
+%% ============================================================
+%% HEADER: Add "Preprint" indicator
+%% ============================================================
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[R]{\textsc{\small Preprint}}
+\fancyfoot[C]{\thepage}
+
+%% ============================================================
+%% CAPTIONS: Tighter spacing
+%% ============================================================
+\RequirePackage{caption}
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    skip=5pt,
+    justification=centering
+}
+
+%% ============================================================
+%% LISTS: More compact
+%% ============================================================
+\RequirePackage{enumitem}
+\setlist{nosep, leftmargin=*}
+\setlist[itemize]{topsep=2pt, itemsep=1pt}
+\setlist[enumerate]{topsep=2pt, itemsep=1pt}
+
+%% ============================================================
+%% FLOATS: Better placement
+%% ============================================================
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+%% ============================================================
+%% WIDOW/ORPHAN CONTROL
+%% ============================================================
+\widowpenalty=10000
+\clubpenalty=10000
+
+\endinput

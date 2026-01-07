@@ -1,6 +1,19 @@
 % \documentclass[editMode]{ufdissertation}\sloppy
 \documentclass{ufdissertation}\sloppy
 
+%% ============================================================
+%% FORMAT TOGGLE: Switch between UF dissertation and arXiv preprint style
+%% ============================================================
+%% Set to 'true' for arXiv-style (compact, single-spaced, 10pt)
+%% Set to 'false' for UF dissertation style (double-spaced, 12pt)
+\newif\ifarxivmode
+\arxivmodefalse  % <-- CHANGE TO \arxivmodetrue FOR ARXIV FORMAT
+%% ============================================================
+
+\ifarxivmode
+    \usepackage{arxiv-override}  % Load arXiv-style overrides
+\fi
+
 \usepackage[colorlinks=true]{hyperref}
 
 % User Package and Style File loading.
@@ -88,21 +101,20 @@
 % no appendix being used
 %\setAppendixFile{appendix}
 
-\multipleAppendixtrue                       
+% \multipleAppendixtrue  % Uncomment if using multiple appendices
 
+% Custom command to add red bold notes in the text (for drafting)
+\newcommand{\dmkm}[1]{{\color{red}{\textbf{[Add]:} #1}}}
 
 %%%%%%% End of File Assignment %%%%%%
 
 \begin{document}
 
-\include{Chapters/1_Introduction} % Introduction (Background -> Motivation ->  Literature Review -> DiffLogic Architecture 
+\include{Chapters/1_Introduction} % Introduction (Background -> Motivation ->  Literature Review -> DiffLogic Architecture
 \include{Chapters/2_Background} % Background/Motivation -- Literature Review + DiffLogic
 \include{Chapters/3_Methods} % Methods (4 contributions)
 \include{Chapters/4_Results} % Results and Future Work
 \include{Chapters/5_Conclusion} % Conclusion
-
-% custom commands to add red bold commands in the text
-\newcommand{\dmkm}[1]{{\color{red}{\textbf{[Add]:} #1}}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
