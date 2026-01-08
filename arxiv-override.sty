@@ -128,4 +128,15 @@
 \widowpenalty=10000
 \clubpenalty=10000
 
+%% ============================================================
+%% TABLE OF CONTENTS: Title case, no underlined "page"
+%% ============================================================
+\renewcommand{\contentsname}{Table of Contents}
+\renewcommand*\listfigurename{List of Figures}
+\renewcommand*\listtablename{List of Tables}
+
+%% Disable uppercase for chapter titles in front matter
+\let\oldMakeUppercase\MakeUppercase
+\renewcommand{\MakeUppercase}[1]{#1}
+
 \endinput
