@@ -134,9 +134,40 @@
 \renewcommand{\contentsname}{Table of Contents}
 \renewcommand*\listfigurename{List of Figures}
 \renewcommand*\listtablename{List of Tables}
+\renewcommand{\bibname}{List of References}
 
 %% Disable uppercase for chapter titles in front matter
 \let\oldMakeUppercase\MakeUppercase
 \renewcommand{\MakeUppercase}[1]{#1}
+
+%% Override hardcoded uppercase front matter titles
+%% These are hardcoded in ufdissertation.cls, so we patch them directly
+\RequirePackage{etoolbox}
+\RequirePackage{xstring}
+
+\AtBeginDocument{%
+    % Patch "LIST OF ABBREVIATIONS" -> "List of Abbreviations"
+    \patchcmd{\maketitle}%
+        {LIST OF ABBREVIATIONS}{List of Abbreviations}{}{}%
+    \patchcmd{\tableofcontents}%
+        {LIST OF ABBREVIATIONS}{List of Abbreviations}{}{}%
+    % Patch "ACKNOWLEDGEMENTS" -> "Acknowledgements"
+    \patchcmd{\maketitle}%
+        {ACKNOWLEDGEMENTS}{Acknowledgements}{}{}%
+    % Patch "BIOGRAPHICAL SKETCH" -> "Biographical Sketch"
+    \patchcmd{\maketitle}%
+        {BIOGRAPHICAL SKETCH}{Biographical Sketch}{}{}%
+}
+
+%% Redefine chapter to handle remaining uppercase titles
+\let\origchapter\chapter
+\renewcommand{\chapter}[1]{%
+    \IfStrEq{#1}{LIST OF ABBREVIATIONS}{\origchapter{List of Abbreviations}}{%
+    \IfStrEq{#1}{ACKNOWLEDGEMENTS}{\origchapter{Acknowledgements}}{%
+    \IfStrEq{#1}{BIOGRAPHICAL SKETCH}{\origchapter{Biographical Sketch}}{%
+    \IfStrEq{#1}{LIST OF REFERENCES}{\origchapter{List of References}}{%
+        \origchapter{#1}%
+    }}}}%
+}
 
 \endinput
