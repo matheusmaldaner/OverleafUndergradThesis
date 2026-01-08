@@ -3,7 +3,7 @@
 
 % This chapter presents the experimental results obtained from the methods listed in the previous section.
 
-This section presents the experimental results corresponding to the three primary objectives outlined in Chapter~\ref{chap:methods}. Specifically, Section~\ref{sec:results_fpga} discusses the outcomes and performance improvements observed when deploying trained DiffLogic models onto FPGA hardware. Section~\ref{sec:results_compression} evaluates the effectiveness of the MiniNet compression algorithm in reducing network complexity without compromising accuracy. Finally, Section~\ref{sec:results_visualization} describes the development and initial results obtained from two novel visualization tools aimed at enhancing model interpretability.
+This section presents the experimental results corresponding to the three primary objectives outlined in Chapter~\ref{chap:methods}. Specifically, Section~\ref{sec:results_fpga} discusses the outcomes and performance improvements observed when deploying trained DiffLogic models onto FPGA hardware. Section~\ref{sec:results_compression} evaluates the effectiveness of the MiniNet compression algorithm in reducing network complexity without compromising accuracy. Finally, Section~\ref{sec:results_visualization} describes the development and initial results obtained from a novel visualization tool aimed at enhancing model interpretability.
 
 \section{Results from Deploying Learned Logic on Hardware}
 \label{sec:results_fpga}
@@ -46,7 +46,7 @@ Twenty-five trained DiffLogic models with varying node counts were evaluated to 
 \end{figure}
 
 
-Table~\ref{tab:fpga_comparison} compares inference times, highlighting significant FPGA speedups. As network sizes grow, FPGA implementations increasingly outperform GPUs, achieving up to 78\% reductions in inference time for the largest models tested. Figure~\ref{fig:graph1} (left) illustrates this relationship, demonstrating a strong correlation ($R^2=0.9283$) that suggests FPGA advantages grow with network size. The right panel of Figure~\ref{fig:graph2} (right) further emphasizes FPGA latency improvements over GPU implementations. Additionally, it is noted that the largest tested network occupied only about 13\% of available LUTs, thus permitting additional logic or multiple circuit instances.
+Table~\ref{tab:fpga_comparison} compares inference times, highlighting significant FPGA speedups. As network sizes grow, FPGA implementations increasingly outperform GPUs, achieving up to 78\% reductions in inference time for the largest models tested. Figure~\ref{fig:graph1} illustrates this relationship, demonstrating a strong correlation ($R^2=0.9283$) that suggests FPGA advantages grow with network size. Figure~\ref{fig:graph2} further emphasizes FPGA latency improvements over GPU implementations. Additionally, it is noted that the largest tested network occupied only about 13\% of available LUTs, thus permitting additional logic or multiple circuit instances.
 
 \begin{table}[htbp]
 \caption{Inference Time: GPU-Based vs. FPGA-Based DiffLogic Networks}
