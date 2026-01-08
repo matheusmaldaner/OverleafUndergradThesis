@@ -129,45 +129,44 @@
 \clubpenalty=10000
 
 %% ============================================================
-%% TABLE OF CONTENTS: Title case, no underlined "page"
+%% TABLE OF CONTENTS: Title case names
 %% ============================================================
 \renewcommand{\contentsname}{Table of Contents}
 \renewcommand*\listfigurename{List of Figures}
 \renewcommand*\listtablename{List of Tables}
-\renewcommand{\bibname}{List of References}
-
-%% Disable uppercase for chapter titles in front matter
-\let\oldMakeUppercase\MakeUppercase
-\renewcommand{\MakeUppercase}[1]{#1}
 
 %% Override hardcoded uppercase front matter titles
 %% These are hardcoded in ufdissertation.cls, so we patch them directly
 \RequirePackage{etoolbox}
-\RequirePackage{xstring}
 
-\AtBeginDocument{%
-    % Patch "LIST OF ABBREVIATIONS" -> "List of Abbreviations"
-    \patchcmd{\maketitle}%
-        {LIST OF ABBREVIATIONS}{List of Abbreviations}{}{}%
-    \patchcmd{\tableofcontents}%
-        {LIST OF ABBREVIATIONS}{List of Abbreviations}{}{}%
-    % Patch "ACKNOWLEDGEMENTS" -> "Acknowledgements"
-    \patchcmd{\maketitle}%
-        {ACKNOWLEDGEMENTS}{Acknowledgements}{}{}%
-    % Patch "BIOGRAPHICAL SKETCH" -> "Biographical Sketch"
-    \patchcmd{\maketitle}%
-        {BIOGRAPHICAL SKETCH}{Biographical Sketch}{}{}%
+%% Patch the addcontentsline command to fix hardcoded uppercase ToC entries
+%% Using \pdfstrcmp for reliable string comparison
+\let\origaddcontentsline\addcontentsline
+\renewcommand{\addcontentsline}[3]{%
+    \ifnum\pdfstrcmp{#3}{LIST OF REFERENCES}=0
+        \origaddcontentsline{#1}{#2}{List of References}%
+    \else\ifnum\pdfstrcmp{#3}{LIST OF ABBREVIATIONS}=0
+        \origaddcontentsline{#1}{#2}{List of Abbreviations}%
+    \else\ifnum\pdfstrcmp{#3}{ACKNOWLEDGEMENTS}=0
+        \origaddcontentsline{#1}{#2}{Acknowledgements}%
+    \else\ifnum\pdfstrcmp{#3}{BIOGRAPHICAL SKETCH}=0
+        \origaddcontentsline{#1}{#2}{Biographical Sketch}%
+    \else\ifnum\pdfstrcmp{#3}{LIST OF TABLES}=0
+        \origaddcontentsline{#1}{#2}{List of Tables}%
+    \else\ifnum\pdfstrcmp{#3}{LIST OF FIGURES}=0
+        \origaddcontentsline{#1}{#2}{List of Figures}%
+    \else\ifnum\pdfstrcmp{#3}{LIST OF OBJECTS}=0
+        \origaddcontentsline{#1}{#2}{List of Objects}%
+    \else\ifnum\pdfstrcmp{#3}{ABSTRACT}=0
+        \origaddcontentsline{#1}{#2}{Abstract}%
+    \else
+        \origaddcontentsline{#1}{#2}{#3}%
+    \fi\fi\fi\fi\fi\fi\fi\fi
 }
 
-%% Redefine chapter to handle remaining uppercase titles
-\let\origchapter\chapter
-\renewcommand{\chapter}[1]{%
-    \IfStrEq{#1}{LIST OF ABBREVIATIONS}{\origchapter{List of Abbreviations}}{%
-    \IfStrEq{#1}{ACKNOWLEDGEMENTS}{\origchapter{Acknowledgements}}{%
-    \IfStrEq{#1}{BIOGRAPHICAL SKETCH}{\origchapter{Biographical Sketch}}{%
-    \IfStrEq{#1}{LIST OF REFERENCES}{\origchapter{List of References}}{%
-        \origchapter{#1}%
-    }}}}%
+%% Override bibname after class sets it (runs at end of preamble processing)
+\AtBeginDocument{%
+    \renewcommand{\bibname}{List of References}%
 }
 
 \endinput
