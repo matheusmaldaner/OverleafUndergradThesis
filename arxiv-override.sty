@@ -55,13 +55,13 @@
 %% ============================================================
 \RequirePackage{titlesec}
 
-% Chapter formatting - less dominant
-\titleformat{\chapter}[display]
+% Chapter formatting - single line, compact (e.g., "1  Introduction")
+\titleformat{\chapter}[hang]
     {\normalfont\LARGE\bfseries}
-    {\chaptertitlename\ \thechapter}
-    {10pt}
-    {\LARGE}
-\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+    {\thechapter}
+    {1em}
+    {}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
 
 % Section formatting
 \titleformat{\section}
