@@ -12,6 +12,10 @@
 
 \ifarxivmode
     \usepackage{arxiv-override}  % Load arXiv-style overrides
+\else
+    % UF mode: Override ragged-right with justified text
+    \usepackage{ragged2e}
+    \justifying
 \fi
 
 \usepackage[colorlinks=true]{hyperref}
