@@ -42,22 +42,25 @@
 
 \usepackage{float} % For [H] placement option
 
-% Define a compact tcolorbox style for algorithms
+% Define a clean, professional algorithm box style
+% Uses horizontal rules only (top/bottom) for a refined academic look
 \newtcolorbox{algorithmbox}{
     enhanced,
-    colback=gray!5,
-    colframe=gray!50,
-    boxrule=0.5pt,
-    arc=2pt,
-    left=4pt,
-    right=4pt,
-    top=2pt,
-    bottom=2pt,
-    before skip=4pt,
-    after skip=4pt
+    colback=white,
+    colframe=black,
+    boxrule=0pt,           % No default border
+    borderline north={0.8pt}{0pt}{black},  % Top rule
+    borderline south={0.8pt}{0pt}{black},  % Bottom rule
+    left=8pt,
+    right=8pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=8pt,
+    after skip=8pt,
+    sharp corners
 }
 
-% Custom algorithm keywords for cleaner pseudocode (no extra vertical space)
+% Custom algorithm keywords for cleaner pseudocode
 \algnewcommand\Input{\item[\textbf{Input:}]}
 \algnewcommand\Output{\item[\textbf{Output:}]}
 \algnewcommand\Phase[1]{\State \textbf{#1}}
