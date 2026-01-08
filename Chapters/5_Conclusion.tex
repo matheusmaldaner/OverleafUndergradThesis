@@ -13,33 +13,28 @@ The thesis showcases that the Differentiable Logic Gate Network architecture pro
 \section{Limitations}
 \label{sec:limitations}
 
-Despite the clear benefits provided by DiffLogic, several limitations remain:
+Despite the clear benefits provided by DiffLogic, several limitations remain.
 
-\begin{itemize}[noitemsep,topsep=0pt]
-    \item \textbf{Scalability Issues}: While DiffLogic networks perform admirably on smaller datasets (such as MNIST and CIFAR-10), scaling them to larger, more complex datasets remains challenging. Increased dataset complexity requires substantially larger networks, complicating training and potentially diluting interpretability.
+\textbf{Scalability Issues.} While DiffLogic networks perform admirably on smaller datasets (such as MNIST and CIFAR-10), scaling them to larger, more complex datasets remains challenging. Increased dataset complexity requires substantially larger networks, complicating training and potentially diluting interpretability.
 
-\item \textbf{Discrete Approximation Error}: The continuous-to-discrete transition in DiffLogic can introduce approximation errors, potentially leading to minor performance degradation after discretization. While manageable so far, this becomes increasingly significant with larger or more nuanced models.
+\textbf{Discrete Approximation Error.} The continuous-to-discrete transition in DiffLogic can introduce approximation errors, potentially leading to minor performance degradation after discretization. While manageable so far, this becomes increasingly significant with larger or more nuanced models.
 
-\item \textbf{Training Instability}: The differentiable training process, though powerful, can exhibit instability and sensitivity to initialization and hyperparameter selection. Additionally, due to the connections in the model being fixed from the start, issues may arise with consistent optimization as network depth increases.
+\textbf{Training Instability.} The differentiable training process, though powerful, can exhibit instability and sensitivity to initialization and hyperparameter selection. Additionally, due to the connections in the model being fixed from the start, issues may arise with consistent optimization as network depth increases.
 
-\item \textbf{Computational Costs}: While DiffLogic models excel at inference with extremely fast decision making, they may take hundreds of times longer than regular ANNs to converge during training. This poses considerable computational training costs, especially when scaled beyond relatively shallow architectures, presenting challenges for broader adoption.
-\end{itemize}
+\textbf{Computational Costs.} While DiffLogic models excel at inference with extremely fast decision making, they may take hundreds of times longer than regular ANNs to converge during training. This poses considerable computational training costs, especially when scaled beyond relatively shallow architectures, presenting challenges for broader adoption.
 
 \section{Future Directions}
 \label{sec:future_directions}
 
-Many research avenues could enhance the efficiency and interpretability of DiffLogic:
+Many research avenues could enhance the efficiency and interpretability of DiffLogic.
 
-\begin{itemize}[noitemsep,topsep=0pt]
-\item \textbf{Building Block Identification}: As DiffLogic networks scale to millions of parameters, understanding individual logic gates becomes infeasible for humans. Therefore, an intriguing direction involves traversing trained DiffLogic networks to identify larger, interpretable combinational blocks (e.g., recognizing combinations of gates as known modules such as Half-Adders or Full-Adders). By abstracting these emergent structures, a higher-level understanding and more intuitive interpretability may be achieved.
+\textbf{Building Block Identification.} As DiffLogic networks scale to millions of parameters, understanding individual logic gates becomes infeasible for humans. Therefore, an intriguing direction involves traversing trained DiffLogic networks to identify larger, interpretable combinational blocks (e.g., recognizing combinations of gates as known modules such as Half-Adders or Full-Adders). By abstracting these emergent structures, a higher-level understanding and more intuitive interpretability may be achieved.
 
-\item \textbf{Scaling to Large Scale Applications}: Efficiently scale DiffLogic networks to larger and more complex datasets beyond MNIST to expand their real world applicability.
+\textbf{Scaling to Large-Scale Applications.} Efficiently scaling DiffLogic networks to larger and more complex datasets beyond MNIST would expand their real-world applicability.
 
-\item \textbf{Larger FPGA Implementations}: While this work demonstrated the initial advantages and the feasibility of deploying DiffLogic models onto FPGAs, further work must be done with larger trained models as well as larger FPGAs.
+\textbf{Larger FPGA Implementations.} While this work demonstrated the initial advantages and feasibility of deploying DiffLogic models onto FPGAs, further work must be done with larger trained models as well as larger FPGAs.
 
-\item \textbf{MiniNets onto FPGAs}: Although this work introduces the concept of MiniNets and the deployment of DiffLogic models onto FPGA hardware, it has yet to leverage both at the same time. Further work seeks to implement the reduced DiffLogic models onto FPGAs.
-
-\end{itemize}
+\textbf{MiniNets onto FPGAs.} Although this work introduces the concept of MiniNets and the deployment of DiffLogic models onto FPGA hardware, it has yet to leverage both simultaneously. Further work seeks to implement the reduced DiffLogic models onto FPGAs.
 
 \section{Conclusion}
 \label{sec:conclusion}
