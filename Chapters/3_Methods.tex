@@ -118,11 +118,9 @@ While MiniNets provide a more compact and interpretable representation of DiffLo
 
 \section{Developing Visualization Software}
 \label{sec:visualizationSoftware}
+\label{sec:diffLogicVisualizer}
 
 Even with intrinsically interpretable architectures like DiffLogic, it can be complicated for the average user to understand how they work due to their complexity and lack of user-friendly visualizations. While numerous tools exist for traditional deep learning interpretability, none adequately address the unique logical structure found in DiffLogic models. To fill this gap, \textit{DiffLogicVisualizer} was developed as a specialized platform that parses and visually renders the architecture learned by DiffLogic.
-
-\subsection{DiffLogicVisualizer Software}
-\label{sec:diffLogicVisualizer} 
 
 Commonly used visualization methods for neural networks (e.g., saliency maps) focus on subsymbolic layers and do not translate effectively to gate-based logic networks. \textit{DiffLogicVisualizer} addresses this by dynamically loading DiffLogic networks and illustrating them as directed acyclic graphs (DAG) in which each node represents a discretized logic gate (e.g., \texttt{AND}, \texttt{OR}, \texttt{XOR}), and edges denote signals passing between gates as detailed in Algorithm \ref{alg:difflogicvisualizer}. The code and documentation for DiffLogicVisualizer are publicly accessible\footnote{Source code can be found at \url{https://github.com/matheusmaldaner/DiffLogicVisualizer}} and have been archived via Zenodo~\cite{maldaner2025difflogicvisualizer}.
 
